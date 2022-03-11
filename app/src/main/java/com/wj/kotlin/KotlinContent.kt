@@ -20,8 +20,39 @@ package com.wj.kotlin
  *   (4)通常 ?: 与let来配合执行null和非null的情况: 例如 name?.let { "$it" } ?: "原来是null"
  * 4.==  值 内容的比较, 相当于equals
  *   === 引用的比较
+ * 5.在类中定义field,在最后生成字节码的时候,相当于:
+ *   var name = "wenjing" 等价于
+ *   @NotNull
+ *   private String name = "wenjing"
+ *   public void setName(String name){
+ *       this.name = name;
+ *   }
+ *   public String getName(){
+ *
+ *   }
+ * 6.防范竞态条件(TODO 应该就是利用内置函数来实现这个功能)
+ *
  */
 const val TAG = "123"
+
+//覆盖set()
+var nameTesr = "124"
+    get() = field
+    set(value1) {
+        field = "**$value1"
+    }
+
+//覆盖get(),field就会失效了
+val name: Int
+    get() = 123
+val name1: String? = "123454"
+
+//防范竞态条件
+fun getShowName(): String {
+    return name1?.also {
+        "1232"
+    } ?: "原来是个null"
+}
 
 
 /**
@@ -94,4 +125,8 @@ private fun todoMethod() {
 fun main() {
     range(34)
     sum(second = 5, first = 4)
+    nameTesr = "123"
+    println(nameTesr)
+    println(name)
+    println(getShowName())
 }
