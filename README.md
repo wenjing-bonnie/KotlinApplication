@@ -15,4 +15,12 @@
 
 ## 3.kotlin的null
 
-* 在kotlin中不能随意赋值null，若必须赋值null，则`var name:String? = null`
+* 在kotlin中不能随意赋值null，若必须赋值null，如`var name:String? = null`
+* 判断不为null的几种方式：     
+  -(1)安全操作符?：例如`name?.length`。当name不为null的时候，才执行该代码；    
+  -(2)安全调用let：例如
+    ```
+  name?.let {
+        println(it.length)
+    }
+    ```

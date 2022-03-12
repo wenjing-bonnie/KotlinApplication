@@ -52,6 +52,9 @@ fun getShowName(): String {
     return name1?.also {
         "1232"
     } ?: "原来是个null"
+    name1?.let {
+        println(it.length)
+    }
 }
 
 
