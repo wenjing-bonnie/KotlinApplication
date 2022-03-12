@@ -37,15 +37,15 @@ const val TAG = "123"
 
 //覆盖set()
 var nameTesr = "124"
-    get() = field
-    set(value1) {
+    get() = field //不允许私有化
+    set(value1) { //可以私有化
         field = "**$value1"
     }
 
 //覆盖get(),field就会失效了
 val name: Int
-    get() = 123
-val name1: String? = "123454"
+    get() = 23
+val name1: String? = "12 3454"
 
 //防范竞态条件
 fun getShowName(): String {
