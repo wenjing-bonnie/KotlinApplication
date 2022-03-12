@@ -53,8 +53,8 @@ fun getShowName(): String {
         "1232"
     } ?: "原来是个null"
     name1?.let {
-        println(it.length)
-    }
+        println(it)
+    } ?: "原来是个null"
 }
 
 
