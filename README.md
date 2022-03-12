@@ -16,18 +16,18 @@
 ## 3.kotlin的null的注意点
 
 * 在kotlin中不能随意赋值null，若必须赋值null，如`var name:String? = null`
-* 判断不为null的几种方式：     
-    -(1)安全操作符?：例如`name?.length`。当name不为null的时候，才执行该代码；       
-    -(2)安全调用let：例如
-  
+* 判断不为null的几种方式：
+    - (1)安全操作符?：例如`name?.length`。当name不为null的时候，才执行该代码；
+    - (2)安全调用let：例如
+
     ```
     name?.let {
         println(it.length)
     }
     ```
-    -(3)断言操作符!!：例如`name!!.length`，不管name是不是为null，都会执行该代码；若为null时，则抛出异常。所以只有100%确定不为null的时候才能使用。    
-    -(4)if语句：例如 `if(name == null)`    
-    -(5)`checkNotNull()`或`requireNotNull()`：在为null的时候抛出异常。
+    - (3)断言操作符!!：例如`name!!.length`，不管name是不是为null，都会执行该代码；若为null时，则抛出异常。所以只有100%确定不为null的时候才能使用。
+    - (4)if语句：例如 `if(name == null)`
+    - (5)`checkNotNull()`或`requireNotNull()`：在为null的时候抛出异常。
 * 与空合并操作符?:配合来执行当出现null的情况。例如`name ?: "原来是一个null字符串"`或者
 
 ```
