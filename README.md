@@ -98,7 +98,7 @@ fun whenExpression(week: Int) {
 
 在kotlin中可以将函数作为一种数据类型。数据类型的表示形式为`(输入参数的数据类型)->返回值的数据类型`，例如`(String,Int)->String`
 
-### 1.将函数赋值给变量
+### 1.将函数类型赋值给变量
 
 像Int/String一样，可以直接将函数赋值给一个变量。有两种方式：
 
@@ -123,7 +123,7 @@ fun whenExpression(week: Int) {
     }
 ```
 
-### 2.函数类型的输入参数
+### 2.将函数类型作为输入参数
 
 主要用来解决java通过接口回调方式来处理回调结果的问题。
 
@@ -155,7 +155,10 @@ fun whenExpression(week: Int) {
 
 * 当函数中含有函数类型的输入参数时，该方法需要用`inline`内联来修饰。  
   这样可以在kotlin转换成字节码的时候，不在需要通过创建类对象来处理该函数类型的输入参数，而是直接将方法替换到调用处，无对象开辟的损耗。
-* 方法的返回值也可以是函数类型。 同样也是可以直接通过lambda表达式或者具名函数的方式，例如：
+
+### 3.方法的返回值也可以是函数类型。
+
+同样也是可以直接通过lambda表达式或者具名函数的方式，例如：
 
 ```
     private fun returnMethod(a: Int, b: Int): (String, Int) -> String {
@@ -177,3 +180,6 @@ fun whenExpression(week: Int) {
       return ::handleResponse
 }
 ```
+
+[具体对应的类是KotlinMethodType.kt]
+
