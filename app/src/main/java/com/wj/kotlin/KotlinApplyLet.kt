@@ -20,6 +20,7 @@ package com.wj.kotlin
  * 6.takeIf:如果匿名函数返回值为true,则返回为对象本身;否则返回为null
  *    与空合并符进行null逻辑处理
  * 7.takeUnless:与takeIf恰好相反
+ * 8.require(_name.isNotBlank()){}第一个输入参数为false则执行lambda表达式的内容,并抛出异常
  */
 
 

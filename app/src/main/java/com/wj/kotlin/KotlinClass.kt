@@ -12,7 +12,6 @@ import android.view.View
  * 2.次构造函数:通过constructor()声明
  *  (1)必须通过:this()来调用主构造函数.通过主构造函数进行统一管理
  * 3.先调用主构造函数(初始化类成员变量、init{}代码块),然后再去调用次构造函数
- * 4.require(_name.isNotBlank()){}第一个输入参数为false则执行lambda表达式的内容,并抛出异常
  * 5.类里面的代码按顺序执行,所以在变量使用之前一定要保证赋值,一般将赋值操作放到最前面
  * 6.类默认的为final进行修饰,不能被继承.=> 可通过open class 来移除final修饰
  * 7. 对象 is class: 判断对象是不是class的对象
@@ -52,12 +51,19 @@ import android.view.View
  *
  * 懒加载
  */
-class KotlinClass( _name: String) //主构造函数,默认有个()
+
+
+class KotlinClass(_name: String) //主构造函数,默认有个()
 {
+    val onClickListener = object : View.OnClickListener {
+        override fun onClick(v: View?) {
+            TODO("Not yet implemented")
+        }
+    }
 
+    val onClickListener1 = View.OnClickListener { TODO("Not yet implemented") }
 
-    val onClickListener = View.OnClickListener { TODO("Not yet implemented") }
-    companion object{
+    companion object {
         var info = "1232"
     }
 

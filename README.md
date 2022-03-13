@@ -195,10 +195,74 @@ fun whenExpression(week: Int) {
 
 * 主构造器：跟在类名后面的()为主构造器.默认的为()，可省略。含有最多的输入参数。
     - (1)若输入变量为临时变量，可直接采用`_name:String`。该值只可在`init{}`中使用，在其他地方无法使用，需要定义成员变量`var name = _name`
-      接收该临时变量。
+      接收该临时变量才可以在类的其他地方使用。
     - (2)通过`var/val name:String`，可直接使用输入变量
-    - (3)通过`init{}`增加主构造函数的逻辑，在转换成字节码只是`{}`代码块，非`static{}`静态代码块。
-* 次构造器：通过`constructor():this()`声明次构造函数。通过主构造函数统一管理。
-* 先调用主构造函数->init{}->次构造函数
-* 类里面的代码按顺序执行，所以在使用变量之前，一定先要将变量进行赋值。一般要将对变量赋值放在最前面。
+    - (3)在`init{}`增加主构造函数的逻辑，转换成字节码只是`{}`代码块，非`static{}`静态代码块。
+* 次构造器：通过`constructor():this()`声明次构造函数。最后通过主构造函数统一管理。
+* 先调用主构造函数 -> init{} -> 次构造函数
+
+### 2.类的一些基本概念
+
+* 类里面的代码按顺序执行，一般要将对变量赋值放在最前面。在使用变量之前，一定先要将变量进行赋值。
 * 类都会继承Any，默认的final进行修饰，不能被继承。->通过`open class`来移除final。
+* `对象 is class`：判断对象是不是class的对象。
+* `对象 as class`：将对象转换成class对象。
+* 懒加载有两种方式：
+    - 使用`lateinit var lazy1: String`，在使用的时候必须进行手动初始化。
+    - 惰性加载，在使用该变量的时候，会主动加载，例如：
+
+```
+    val lazy2 by lazy {
+        lazyVar()
+    }
+    private fun lazyVar(): String {
+        return "1222"
+    }
+```
+
+### 3.接口类的实例化
+
+* 匿名方式：通过`object:接口类`，例如：
+
+```
+   val onClickListener = object : View.OnClickListener {
+        override fun onClick(v: View?) {
+            TODO("Not yet implemented")
+        }
+   }
+```
+
+* lambda表达式，但不适用于kotlin中的接口类。例如：
+
+```
+   val onClickListener1 = View.OnClickListener { TODO("Not yet implemented") }
+```        
+
+* 具名：直接定义一个子类实现接口，然后实例化子类。
+
+### 4.单例类 -> 类似于java的static类
+
+* `object class`声明单例类，只有一个该类的实例，此时`init{}`为静态代码块。在转换成字节码时，该类会通过`public static final`进行修饰。
+* `companion object{}`声明伴生对象，`{}`里面可定义val/var/fun。该伴生对象只会加载一次。在转换成字节码时，该类会通过`public static final`
+  进行修饰。
+
+### 5.内部类和嵌套类
+
+* 下面InterClass就是一个嵌套类。外部类可以访问嵌套类，但是嵌套类不能访问外部类。
+
+```
+class OuterCls {
+    class InterClass {
+        
+    }
+}
+```
+
+* 在java中外部类和内部类是可以相互访问，所以在kotlin中通过在`inner`来标记是一个内部类，才可以访问外部类。
+
+### 6.数据类：通过`data`修饰class
+
+* 普通类只会继承Any，只提供了标准和set/get/构造函数，里面的方法都没有复写。
+* 数据类实现了具体的方法，例如copy/toString/hashCode/equals等等，可以直接利用这些方法。
+* 但是数据类在实现这些方法的时候，仅处理主构造函数中的输入参数。如果数据类有次构造函数，需要注意这些方法的使用。
+* `fun component1()`对应主构造函数的输入参数，并且顺序只能为1,2,3...
