@@ -91,3 +91,89 @@ fun whenExpression(week: Int) {
 
 * 标记一些特殊含义的方法名
 * 某些java方法恰好是kotlin的关键字，如`is`
+
+[具体对应的类是KotlinContent.kt]
+
+## 二、函数类型
+
+在kotlin中可以将函数作为一种数据类型。数据类型的表示形式为`(输入参数的数据类型)->返回值的数据类型`，例如`(String,Int)->String`
+
+### 1.将函数赋值给变量
+
+像Int/String一样，可以直接将函数赋值给一个变量。有两种方式：
+
+* (1)lambda表达式（本质就是一个匿名函数），其中最后一行代码为方法的返回值。
+
+```
+    val method: (Int) -> String = { a: Int ->
+        //实现函数的具体内容.匿名函数不要写返回，最后一行就是返回值
+        " ${a}dadafds"
+    }
+```    
+
+这里的method后面的函数修饰符`(Int) -> String`可以省略，直接通过类型推断的方式得到method的类型
+
+* (2)具名函数：在已有的方法名添加::
+
+```
+    val method = handleResponse(3, 4)
+    private fun handleResponse(msg: String, code: Int): String {
+        println("msg:$msg , code:${code}")
+        return "msg:$msg , code:${code}"
+    }
+```
+
+### 2.函数类型的输入参数
+
+主要用来解决java通过接口回调方式来处理回调结果的问题。
+
+* 实现方式：在输入参数中有一个函数类型的输入参数。相对于java的接口类型的输入参数，在kotlin中改为函数类型的输入参数。例如：
+
+```
+  private inline fun login(user: String, password: String, response: (String, Int) -> String) {
+    if (user.length > 3 && password.length > 3) {
+        response("ok", 200)
+    } else {
+        response("failed", 300)
+    }
+  }
+```
+
+在调用该login的方式的时候，通过下面的方式对函数类型的输入参数进行赋值，例如：
+
+```
+    login("liuwenjing", "123456") { msg: String, code: Int ->
+        "${msg} , ${code}"
+    }
+```
+
+或者
+
+```
+    login("liuwenjing", "123456", ::handleResponse)
+```
+
+* 当函数中含有函数类型的输入参数时，该方法需要用`inline`内联来修饰。  
+  这样可以在kotlin转换成字节码的时候，不在需要通过创建类对象来处理该函数类型的输入参数，而是直接将方法替换到调用处，无对象开辟的损耗。
+* 方法的返回值也可以是函数类型。 同样也是可以直接通过lambda表达式或者具名函数的方式，例如：
+
+```
+    private fun returnMethod(a: Int, b: Int): (String, Int) -> String {
+      val firstSum = a + b
+      return { aa: String, bb: Int ->
+        println("$a+$b=?")
+        val sum = aa + bb + firstSum
+        sum
+    }
+    // return ::handleResponse
+}
+```
+
+或者
+
+```
+    private fun returnMethod(a: Int, b: Int): (String, Int) -> String {
+      val firstSum = a + b
+      return ::handleResponse
+}
+```
