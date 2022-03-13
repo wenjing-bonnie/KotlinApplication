@@ -35,13 +35,17 @@
         println(it)
     } ?: "原来是个null"
 ```
+
 ### 4.== 和 ===
-  == 值或内容的比较，相当于java的equals；   
-  === 引用的比较   
+
+== 值或内容的比较，相当于java的equals；   
+=== 引用的比较
+
 ### 5.在类中定义成员变量时，在最后生成字节码的时候，会自动添加get/set方法
+
 * 默认的`get()`/`set()`就将该成员变量的`field`进行赋值。
 * 当然也可以对`get()`/`set()`替换该逻辑，例如：
-  
+
 ```
    var name = "124"
     get() = field //不允许私有化
@@ -49,4 +53,41 @@
         field = "欢迎$value1"
     }
 ```
+
 * `get()`不可私有化；`set()`可私有化。
+
+### 6.range表达式
+
+```
+fun range(number: Int) {
+    if (number in 0..10) {
+        println("range 0~10")
+    } else if (number in 20..30 step 2) {
+        println("range 20~30")
+    } else if (number in 40 downTo 30 step 2) {
+        println("range 40~30")
+    }
+}
+```
+
+### 7.when表达式相当于java的switch
+
+```
+fun whenExpression(week: Int) {
+    val info = when (week) {
+        1 -> "111111"
+        2 -> "222222"
+        else -> {
+            //此种情况下返回值为Unit,相当于java的void
+            println()
+        }
+    }
+}    
+```
+
+### 8.Nothing表达式：抛出异常
+
+### 9.反引号函数
+
+* 标记一些特殊含义的方法名
+* 某些java方法恰好是kotlin的关键字，如`is`
