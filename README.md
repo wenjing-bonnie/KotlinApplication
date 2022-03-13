@@ -30,11 +30,11 @@
     - (5)`checkNotNull()`或`requireNotNull()`：在为null的时候抛出异常。
 * 与空合并操作符?:配合来执行当出现null的情况。例如`name ?: "原来是一个null字符串"`或者
 
-```
+  ```
    name?.let {
         println(it)
     } ?: "原来是个null"
-```
+  ```
 
 ### 4.== 和 ===
 
@@ -130,13 +130,13 @@ fun whenExpression(week: Int) {
 * 实现方式：在输入参数中有一个函数类型的输入参数。相对于java的接口类型的输入参数，在kotlin中改为函数类型的输入参数。例如：
 
 ```
-  private inline fun login(user: String, password: String, response: (String, Int) -> String) {
-    if (user.length > 3 && password.length > 3) {
+    private inline fun login(user: String, password: String, response: (String, Int) -> String) {
+      if (user.length > 3 && password.length > 3) {
         response("ok", 200)
-    } else {
+      } else {
         response("failed", 300)
+      }
     }
-  }
 ```
 
 在调用该login的方式的时候，通过下面的方式对函数类型的输入参数进行赋值，例如：
