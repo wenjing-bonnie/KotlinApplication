@@ -350,3 +350,4 @@ class JobSummary(val job: JobSealed) {
 }
 println(JobSummary(JobSealed.POLICE("张三")).showJob())
 ```
+[具体对应的类是KotlinSpecialClass.kt]
