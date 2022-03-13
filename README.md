@@ -181,5 +181,7 @@ fun whenExpression(week: Int) {
 }
 ```
 
+<font color = "#ff0000">【TODO 遗留问题：函数类型的返回值的应用场景是什么呢？？？？？】</font>
+
 [具体对应的类是KotlinMethodType.kt]
 

@@ -114,6 +114,8 @@ fun main() {
      */
     val method = returnMethod(3, 4)
     println(method("3", 6))
+
+    calculator()
 }
 
 private fun handleResponse(msg: String, code: Int): String {
@@ -133,4 +135,40 @@ private fun returnMethod(a: Int, b: Int): (String, Int) -> String {
         sum
     }
     // return ::handleResponse
+}
+
+/**
+ * 函数类型的返回值的应用场景
+ * 订单的最后计算金额：当选择快递方式不一样的时候，对应的订单金额的计算方式不同
+ * 感觉有点装饰者模式的感觉
+ */
+enum class Delivery {
+    STANDARD,
+    EXPIRED
+}
+
+class Order(val itemCount: Int) {
+
+}
+
+fun getOrder(delivery: Delivery): (Order) -> Double {
+    val expired: (Order) -> Double = { order ->
+        6 + 1.2 * order.itemCount
+    }
+    val standard: (Order) -> Double = { order ->
+        8 + 2.2 * order.itemCount
+    }
+    val result = when (delivery) {
+        Delivery.EXPIRED -> expired
+        Delivery.STANDARD -> standard
+    }
+    return result
+}
+
+/**
+ * 测试  函数类型的返回值的应用场景
+ */
+fun calculator() {
+    val order = getOrder(Delivery.STANDARD)
+    println("order is ${order(Order(1))}")
 }
