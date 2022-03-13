@@ -44,7 +44,6 @@ enum class Color(val rgb: Int) {
     GREEN(0x00FF00)
 }
 
-
 data class Job(val content: String, val title: String) {
 }
 
@@ -87,7 +86,6 @@ class JobSummary(val job: JobSealed) {
             is JobSealed.TEACHER -> "教书育人"
             is JobSealed.POLICE -> "人民公仆 ${job.name}"
         }
-
 }
 
 

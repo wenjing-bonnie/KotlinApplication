@@ -199,7 +199,7 @@ fun whenExpression(week: Int) {
     - (2)通过`var/val name:String`，可直接使用输入变量
     - (3)在`init{}`增加主构造函数的逻辑，转换成字节码只是`{}`代码块，非`static{}`静态代码块。
 * 次构造器：通过`constructor():this()`声明次构造函数。最后通过主构造函数统一管理。
-* 先调用主构造函数 -> init{} -> 次构造函数
+* 先调用主构造函数(在输入参数中的类成员变量) -> init{}(与主构造函数的类成员变量同时生成) -> 次构造函数
 
 ### 2.类的一些基本概念
 
@@ -266,3 +266,87 @@ class OuterCls {
 * 数据类实现了具体的方法，例如copy/toString/hashCode/equals等等，可以直接利用这些方法。
 * 但是数据类在实现这些方法的时候，仅处理主构造函数中的输入参数。如果数据类有次构造函数，需要注意这些方法的使用。
 * `fun component1()`对应主构造函数的输入参数，并且顺序只能为1,2,3...
+* 可对里面的运算符进行重载，完成新的逻辑。通过`operator fun 运算符`的方式进行重载。可通过`operator fun 类.`找到要重载的运算符。
+* 数据类的应用场景：
+    - (1)服务器返回的响应JavaBean、ResponseBean。
+    - (2)主构造函数至少有一个val/var修饰的输入参数。
+    - (3)不能被abstract/open/sealed/inner等进行修饰，只能做数据存储。
+    - (4)应用于需要进行比较的时候。可以方便的利用里面的具体方法。
+
+[具体对应的类是KotlinClass.kt和KotlinSpecialClass.kt]
+
+### 7.接口类和抽象类
+
+* 同java一致，里面的成员变量和方法都是public open
+* 接口中不能有主构造函数，也就是只能定义为`interface xxx{}`
+* 实现接口的时候，里面的成员变量和方法都需要复写。成员变量在复写的时候，可通过实现类的主构造函数或者set/get进行复写。
+* 接口类中的成员变量可以定义为val，但是一旦赋值不可修改。
+* 抽象类同java。
+
+[具体对应的类是KotlinInterface.kt]
+
+### 8.枚举类：使用`enum`进行修饰
+
+* 本身就是一个class。每个枚举值都是枚举类本身。即`枚举值 is 枚举类` 为true。所有的枚举值类型必须一致。
+* 枚举值可以为一个常量字符串，例如：
+
+```
+enum class Week {
+    星期一,
+    星期二
+}
+```
+
+* 可以通过主构造函数为枚举值赋值，例如：
+
+```
+enum class Color(val rgb: Int) {
+    RED(0xFF0000),
+    GREEN(0x00FF00)
+}
+```
+
+* 枚举值也可以为一个类。但是此时枚举类的主构造函数的输入参数就是该类枚举值类型。例如：
+
+```
+//定义的类的枚举值
+data class Job(val content: String, val title: String) {
+}
+//定义的枚举类，输入参数必须为类枚举值
+enum class Jobs(val job: Job) {
+    DOCTOR(Job("看病", "doctor")),
+    TEACHER(Job("教书", "teacher")),
+    POLICE(Job("抓坏人", "police"));
+
+    fun job() {
+        println("in The job is ${job.title} , the content is ${job.content}")
+    }
+}
+//使用枚举类
+Jobs.DOCTOR.job()
+```
+
+### 9.密封类：使用`sealed`修饰。
+
+* 可解决枚举类的枚举值类型不一致的问题，可对枚举值进行扩展，增加额外的参数。
+* 具体实现方式就是：通过`object定义成员变量，并且还要继承本类`，例如：
+
+```
+//定义密封类
+sealed class JobSealed {
+    object DOCTOR : JobSealed()
+    object TEACHER : JobSealed()
+    class POLICE(val name: String) : JobSealed()
+}
+//使用密封类，需要扩展的枚举值通过主构造函数传入
+class JobSummary(val job: JobSealed) {
+
+    fun showJob() =
+        when (job) {
+            is JobSealed.DOCTOR -> "白衣天使"
+            is JobSealed.TEACHER -> "教书育人"
+            is JobSealed.POLICE -> "人民公仆 ${job.name}"
+        }
+}
+println(JobSummary(JobSealed.POLICE("张三")).showJob())
+```
