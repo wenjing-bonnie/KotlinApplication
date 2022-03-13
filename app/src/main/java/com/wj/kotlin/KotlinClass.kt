@@ -81,6 +81,7 @@ class KotlinClass( _name: String) //主构造函数,默认有个()
      */
     constructor(name: String, sex: Char) : this(name) {
         println("次构造函数进行调用$name")
+
     }
 
     /**
