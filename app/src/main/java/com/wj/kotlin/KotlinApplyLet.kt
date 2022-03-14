@@ -9,7 +9,7 @@ import java.io.BufferedReader
 
  * 1.let
  *   返回值的类型根据匿名函数的最后一行代码;含有it,就是该对象.
- *   [应用场景] (1)与空合并符进行null逻辑处理,代替if判断。(2)明确该变量的作用域范围内可以使用
+ *   [应用场景] (1)与空合并符进行null逻辑处理,代替if判断。(2)明确该变量的特定的作用域范围内可以使用
  *
  * 2.with
  *   与run一样,但是需要将对象主动传入,例如with(info, ::isLong)
@@ -26,10 +26,11 @@ import java.io.BufferedReader
  *   方便链式调用。
  *   与run的作用差不多，唯一不同的是返回值不同。返回的是对象本身，而run返回的是最后一行代码的值
  *   [应用场景]用于对象实例化时对属性进行赋值&返回该对象。或者动态inflate出一个view时，需要给view绑定数据。特别是model向viewmodel转化实例化过程时需要
- *   如
+ *   或者多层级的判空问题。
  *
- *    * 5.also
+ * 5.also
  *   返回值就是对象本身的类型;含有it,就是该对象.
+ *   类似于let。区别在于返回的是对象本身。一般用于多个扩展函数链式调用。
  *   可以链式调用
  *
  *
@@ -65,7 +66,6 @@ private fun apply() {
 //        setBackgroundColor(Color.RED)
 //        setPadding(0,0,0,0)
 //    }
-    多层
 
 }
 
