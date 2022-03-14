@@ -417,3 +417,12 @@ println(JobSummary(JobSealed.POLICE("张三")).showJob())
 * [持有it指向对象]
 * 返回值类型[对象本身]
 * [应用场景]同let。
+
+``` 
+private fun also(reader: BufferedReader) {
+    var line: String?;
+    while (reader.readLine().also { line = it } != null) {
+        println(line)
+    }
+}
+```
