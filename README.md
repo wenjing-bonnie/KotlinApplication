@@ -426,3 +426,9 @@ private fun also(reader: BufferedReader) {
     }
 }
 ```
+
+### 6.内联扩展函数 takeIf和takeUnless
+
+* [持有it指向对象]
+* takeIf返回值类型{}中的最后一行为true，则返回对象本身。否则返回null。takeUnless恰好相反。
+* [应用场景] 只需要单个if分支语句。配合其他扩展函数。（相当于在{}中放了一个if条件，如果满足该条件，则返回对象本身，可继续链式调用）
