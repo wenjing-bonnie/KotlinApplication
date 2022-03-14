@@ -26,12 +26,20 @@ fun <B> show(item: B) {
 class RxJava<T>(val isMap: Boolean, var input: T) {
     /**
      * T是要变换的类型,R是变换后的类型
+     * 单表达式方法，当方法仅有单个表达式时，可以省略花括号，并在 = 后指定方法体即可
      */
-    fun <R> map(mapAction: (T) -> R) {
+    fun <R> map(mapAction: (T) -> R) = mapAction(input)
 
-    }
+//    fun <R> map(mapAction: (T) -> R): R {
+//        return mapAction(input)
+//    }
+
 }
 
 fun main() {
     println(Generic("123", true).getGenericObj())
+    val result = RxJava(true, 123).map {
+        println("${it}")
+        it.toString()
+    }
 }
