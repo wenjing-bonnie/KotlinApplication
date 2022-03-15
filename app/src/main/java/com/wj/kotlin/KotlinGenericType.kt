@@ -31,6 +31,8 @@ import android.app.Activity
  *
  * 不变-既不用in又不用out：既可以作为函数参数也可以作为返回值
  *
+ *
+ *
  * 4.类型擦除
  * 像Array<T>如：Array<String>、Array<Int>的实例，在运行的时候都会被擦除为Array<*>
  * 好处在于可以减少内存中的类型信息
@@ -42,15 +44,10 @@ import android.app.Activity
  * 带来的问题：
  * 在Java中不能调用该实化类型参数的函数。
  *
- * 在泛型声明的实例，在运行时，实例不保留关于泛型的任何信息
- * reified:保证泛型类型在运行的时候能够保留，在kotlin中称为实化
- * inline函数的原理就是将内联函数的字节码动态插入到每次的调用者。
- * 在增加reified,那么在每次调用带实化类型的函数时，编译器在每次调用时生成对应不同类型实参的字节码，动态插入到调用点
- * 抽象的东西更加具体或者真实，让泛型更简单安全。
- * 必须与inline一起使用
- * 但是在Java中不能调用该实化类型参数的函数。
+ *5.泛型的型变
+ * 默认的泛型是不型变的，无法完成类型的自动转换
  *
- * 星投影List<*>类似于java的List<?>
+ * 星投影List<*>类似于java的List<?>，用于泛型参数的类型不重要的场景
  */
 
 //val  a =
@@ -76,6 +73,26 @@ open class Animal {
 class Dog : Animal() {
 
 }
+
+fun xingbian() {
+    //声明处型变
+    //默认的泛型是不型变的，无法完成类型的自动转换。但是像下面的逻辑 Dog是Animal的子类，这个赋值是合理的。
+    //但是List/Set/Map是可以正常赋值，这是因为在List的集合中使用了public interface List<out E> : Collection<E> {}
+    var dogs: Array<Dog> = arrayOf(Dog(), Dog(), Dog())
+    //所以在前面添加out就可以
+    var animals: Array<out Animal> = dogs
+
+    //使用处型变
+    var animals1: Array<Animal> = arrayOf(Animal(), Animal(), Animal())
+    // copy(animals1, dogs)
+}
+
+//使用处型变
+//fun copy(from: Array<out Animal>, to: Array<in Animal>) {
+//    for (i in from.indices) {
+//        to[i] = from[i]
+//    }
+//}
 
 class ProducerClass : Producer<Animal> {
     override fun producer(): Animal {
