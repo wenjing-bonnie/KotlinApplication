@@ -449,3 +449,19 @@ private fun also(reader: BufferedReader) {
 ### 3.泛型约束
 
 * 指定泛型上界，可通过`fun <B : String> show(item: B)限制上界范围`
+* 协变out，使用out修饰的泛型，作用：
+    - (1)表示该泛型只能做返回值，不能作为输入参数进行修改。可以通过这样方式记忆out的作用 [返回值 -> output -> out]
+
+``` 
+interface Producer<out T> {
+   //这样是可以的
+    fun producer(): T
+    //不能这样操作，直接报编译错误。
+    fun consumer(t:T)
+}
+```
+
+    - (2)表示该泛型可以接收其子类或者本身，相当于java的`? extends`。默认情况下，不支持将一个子类赋值给一个父类的声明。
+
+*协变int,
+    
