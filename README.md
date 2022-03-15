@@ -432,5 +432,20 @@ private fun also(reader: BufferedReader) {
 * [持有it指向对象]
 * takeIf返回值类型{}中的最后一行为true，则返回对象本身。否则返回null。takeUnless恰好相反。
 * [应用场景] 只需要单个if分支语句。配合其他扩展函数。（相当于在{}中放了一个if条件，如果满足该条件，则返回对象本身，可继续链式调用）
- 
+
 [具体对应的类是KotlinApplyLet.kt]
+
+## 六、泛型
+
+### 1.声明泛型类
+
+* `class Generic<T> (val obj:T)`
+
+### 2.声明泛型方法
+
+* 只有一个泛型：`fun <B> show(item : B)`
+* 多个泛型：`fun <O, R> map(isMap: Boolean, input2: R, mapAction1: (T, R) -> O)`
+
+### 3.泛型约束
+
+* 指定泛型上界，可通过`fun <B : String> show(item: B)限制上界范围`
