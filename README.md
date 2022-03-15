@@ -449,20 +449,20 @@ private fun also(reader: BufferedReader) {
 ### 3.泛型约束
 
 * 指定泛型上界，可通过`fun <B : String> show(item: B)限制上界范围`
-* 协变out，使用out修饰的泛型，作用：
-    - (1)表示该泛型只能做返回值，不能作为输入参数进行修改。可以通过这样记忆out的作用 [返回值 -> output -> out]
+* 协变out，使用out修饰的泛型[作用一] 表示该泛型只能做返回值，不能作为输入参数进行修改。可以通过这样记忆out的作用 [返回值 -> output -> out]
 
 ``` 
     interface Producer<out T> {
         //这样是可以的
        fun producer(): T
-        //不能这样操作，直接报编译错误。
+        //不能这样操作，直接编译不通过。
         fun consumer(t:T)
     }
-```
+    
+``` 
 
-。 - (2)表示该泛型可以接收其子类或者本身，相当于java的`? extends`。上例中的T既可以接收子类和其本身。
-有两个类父类Animal和子类Dog，那么在实现上面的Producer<out T>接口的时候，该泛型支持如下操作：
+* 协变out，使用out修饰的泛型[作用二]表示该泛型可以接收其子类或者本身，相当于java的`? extends`。上例中的T既可以接收子类和其本身。
+  有两个类父类Animal和子类Dog，那么在实现上面的Producer<out T>接口的时候，该泛型支持如下操作：
 
 ``` 
     open class Animal {
@@ -476,7 +476,31 @@ private fun also(reader: BufferedReader) {
 
 ```
 
-    - (3)表示泛型具体的子类对象 可以赋值给 父类声明。默认情况下，不支持将一个子类赋值给一个父类的声明。
+* 协变out，使用out修饰的泛型[作用三]表示泛型具体的子类对象 可以赋值给 父类声明。默认情况下，不支持将泛型一个子类赋值给一个父类的声明。
 
-*协变int,
-    
+``` 
+    val p1: Producer<Animal> = ProducerClass()
+    val p2: Producer<Animal> = ProducerDogClass()
+```
+
+* 协变int,使用int修饰的泛型[作用一]表示泛型只能做函数的参数，不能做返回值。可以通过这样记忆int的作用 [输入参数 -> input -> in(反过来就是逆变的拼音)]
+
+``` 
+interface Consumer<in T> {
+     //不能这样操作，直接编译不通过。
+     fun producer(): T
+     //这样是可以的
+     fun consumer(t: T)
+}
+```
+
+* 协变int,使用int修饰的泛型[作用二]表示该泛型可以接收父类或其本身，相当于java的`? super`。上例的T既可以接收父类也可接收本身。
+* 协变int,使用int修饰的泛型[作用三]表示泛型的父类可以赋值给子类的声明。默认情况下泛型的一个具体的父类实现是不能赋值给一个子类声明的。
+
+``` 
+val c3: Consumer<Dog> = ConsumerClass()
+```
+
+* 大胆思考下in/out都是[为了让泛型可以将子类或者父类具体的实现 赋值给 父类或者子类的声明]，但差别在于out是[限制了该泛型只能做函数的返回值]，相当于java的`? extends`
+  ；而in是[限制了该泛型只能做函数的输入参数]，相当于java的`? super`。
+* 若是该泛型既可以做函数返回值又可以做函数的输入参数，那么就不要添加任何限制。

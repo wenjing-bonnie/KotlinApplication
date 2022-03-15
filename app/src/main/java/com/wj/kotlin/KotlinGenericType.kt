@@ -25,6 +25,8 @@ package com.wj.kotlin
  * 逆变-in（下界约束）: 相当于java的 ? super。该类型的参数只能做输入参数，不能返回
  * 该类型必须是父类或者本身
  * 应用场景：传入泛型作为函数的参数，input -> in
+ * 默认的情况下父类对象是不可以赋值给子类对象
+ *
  * 不变-既不用in又不用out：既可以作为函数参数也可以作为返回值
  *
  */
@@ -60,6 +62,25 @@ class ProducerDogClass : Producer<Dog> {
 
 }
 
+class ProducerString : Producer<String> {
+    override fun producer(): String {
+        return "2"
+    }
+}
+
+class ConsumerClass : Consumer<Animal> {
+    override fun consumer(t: Animal) {
+
+    }
+
+}
+
+class ConsumerDogClass : Consumer<Dog> {
+    override fun consumer(t: Dog) {
+
+    }
+}
+
 interface Fly {
 
 }
@@ -73,6 +94,9 @@ fun out() {
     //接口类对象 = 实现类
     val p1: Producer<Animal> = ProducerClass()
     val p2: Producer<Animal> = ProducerDogClass()
+    val c1: Consumer<Animal> = ConsumerClass()
+    val c3: Consumer<Dog> = ConsumerClass()
+    val c2: Consumer<Dog> = ConsumerDogClass()
 }
 
 //class Generic1<out T>(val animal: T) {
