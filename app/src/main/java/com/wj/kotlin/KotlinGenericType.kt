@@ -1,5 +1,7 @@
 package com.wj.kotlin
 
+import android.app.Activity
+
 /**
  * create by wenjing.liu at 2022/3/13
  * 1.泛型
@@ -29,7 +31,33 @@ package com.wj.kotlin
  *
  * 不变-既不用in又不用out：既可以作为函数参数也可以作为返回值
  *
+ * 4.类型擦除
+ * 像Array<T>如：Array<String>、Array<Int>的实例，在运行的时候都会被擦除为Array<*>
+ * 好处在于可以减少内存中的类型信息
+ * 但是运行时无法检测一个实例是否带有某个类型参数的泛型类型，不保留关于泛型的任何信息。
+ *
+ * 所以在kotlin中如果需要具体的泛型类型，可以通过inline+reified方式来保留泛型的具体类型。
+ * 原理：inline函数的原理就是将内联函数的字节码动态插入到每次的调用者。
+ * 在增加reified,那么在每次调用带实化类型的函数时，编译器在每次调用时生成对应不同类型实参的字节码，动态插入到调用点
+ * 带来的问题：
+ * 在Java中不能调用该实化类型参数的函数。
+ *
+ * 在泛型声明的实例，在运行时，实例不保留关于泛型的任何信息
+ * reified:保证泛型类型在运行的时候能够保留，在kotlin中称为实化
+ * inline函数的原理就是将内联函数的字节码动态插入到每次的调用者。
+ * 在增加reified,那么在每次调用带实化类型的函数时，编译器在每次调用时生成对应不同类型实参的字节码，动态插入到调用点
+ * 抽象的东西更加具体或者真实，让泛型更简单安全。
+ * 必须与inline一起使用
+ * 但是在Java中不能调用该实化类型参数的函数。
+ *
+ * 星投影List<*>类似于java的List<?>
  */
+
+//val  a =
+
+inline fun <reified T : Activity> openActivity(clazz: Class<T>) {
+
+}
 
 interface Producer<out T> {
     fun producer(): T
