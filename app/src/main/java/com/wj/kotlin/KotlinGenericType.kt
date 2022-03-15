@@ -34,6 +34,9 @@ class RxJava<T>(val isMap: Boolean, var input: T) {
 //        return mapAction(input)
 //    }
 
+    fun <O, R> map(isMap: Boolean, input2: R, mapAction1: (T, R) -> O) {
+        if (isMap) mapAction1(input, input2) else null
+    }
 }
 
 fun main() {
@@ -41,5 +44,9 @@ fun main() {
     val result = RxJava(true, 123).map {
         println("${it}")
         it.toString()
+    }
+
+    val result1 = RxJava(true, "123").map(true, 123) { first, second ->
+        println("$first , $second")
     }
 }
