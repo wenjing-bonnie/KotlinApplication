@@ -70,6 +70,7 @@ fun out() {
     //默认的是不能将父类对象赋值给一个子类声明
     //var animal:Dog = Animal()
 
+    //接口类对象 = 实现类
     val p1: Producer<Animal> = ProducerClass()
     val p2: Producer<Animal> = ProducerDogClass()
 }

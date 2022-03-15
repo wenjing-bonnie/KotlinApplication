@@ -450,18 +450,33 @@ private fun also(reader: BufferedReader) {
 
 * 指定泛型上界，可通过`fun <B : String> show(item: B)限制上界范围`
 * 协变out，使用out修饰的泛型，作用：
-    - (1)表示该泛型只能做返回值，不能作为输入参数进行修改。可以通过这样方式记忆out的作用 [返回值 -> output -> out]
+    - (1)表示该泛型只能做返回值，不能作为输入参数进行修改。可以通过这样记忆out的作用 [返回值 -> output -> out]
 
 ``` 
-interface Producer<out T> {
-   //这样是可以的
-    fun producer(): T
-    //不能这样操作，直接报编译错误。
-    fun consumer(t:T)
-}
+    interface Producer<out T> {
+        //这样是可以的
+       fun producer(): T
+        //不能这样操作，直接报编译错误。
+        fun consumer(t:T)
+    }
 ```
 
-    - (2)表示该泛型可以接收其子类或者本身，相当于java的`? extends`。默认情况下，不支持将一个子类赋值给一个父类的声明。
+。 - (2)表示该泛型可以接收其子类或者本身，相当于java的`? extends`。上例中的T既可以接收子类和其本身。
+有两个类父类Animal和子类Dog，那么在实现上面的Producer<out T>接口的时候，该泛型支持如下操作：
+
+``` 
+    open class Animal {
+    }
+    class Dog : Animal() {
+    }
+    class ProducerClass : Producer<Animal>{
+    }
+    class ProducerDogClass : Producer<Dog> {
+    }
+
+```
+
+    - (3)表示泛型具体的子类对象 可以赋值给 父类声明。默认情况下，不支持将一个子类赋值给一个父类的声明。
 
 *协变int,
     
