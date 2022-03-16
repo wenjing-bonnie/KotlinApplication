@@ -500,6 +500,39 @@ private fun also(reader: BufferedReader) {
 * [with]
     - 同run，只不过是需要将对象传入到with
 
+### 7.自定义内置函数
+
+* T.()：为T的扩展函数，那么就可以在该扩展函数体内直接访问T的成员变量和成员函数。那么在函数体可以直接使用this
+* (T)：就是一个T类型。在函数体内持有it
+* ()：一个普通的函数，在函数体内只能通过T的外部变量来访问其变量和函数。
+* 自定义let。其特点：持有的是it，返回的是匿名函数的最后一行代码。思路如下：
+    - 对I的扩展函数 -> 定义为`fun I.mLet()`。
+    - 传入的lamdba表达式需要具备：持有的是it，返回值为最后一行代码的类型 -> 定义输入参数为`lambda: (I) -> O`。
+    - 采用了lamdba表达式作为传入参数，为了避免创建额外的对象 -> 该函数使用`inline`进行修饰。
+    - 由于调用let的时候需要返回匿名函数的最后一行代码的返回值 -> 直接采用lamdba的返回值。
+
+``` 
+private inline fun <I, O> I.mLet(lambda: (I) -> O) = lambda(this)
+```  
+
+* 自定义apply。奇特的：持有this，返回的对象本身。思路如下：
+    - 对I的扩展函数 -> 定义为` fun I.mApply()`
+    - 传入的lamdba表达式需要具备：持有this，无需返回值。`mApply()`
+      返回的是对象本身，并不是该lamdba表达式返回值。另外这个lamdba表达式要能够直接访问到其对象的成员变量和函数，所以需要将输入参数定义为一个扩展函数 ->
+      定义输入参数为`lambda: I.() -> Unit`。
+    - 采用了lamdba表达式作为传入参数，为了避免创建额外的对象 -> 该函数使用`inline`进行修饰。
+    - 由于调用apply的时候需要返回对象本身 -> 该`mApply()`直接返回this。
+
+``` 
+private inline fun <I> I.mApply(lambda: I.() -> Unit): I {
+    //lambda(this) //默认就有this，所以可以直接不添加this
+    lambda()
+    return this
+}
+```  
+
+[具体对应的类是KotlinInline.kt]
+
 ## 六、泛型
 
 ### 1.声明泛型类
