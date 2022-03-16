@@ -112,8 +112,9 @@ fun main() {
     /**
      * （3实例）的调用
      */
+
     val method = returnMethod(3, 4)
-    println(method("3", 6))
+    println(method("32", 6222))
 
     calculator()
 }
@@ -129,12 +130,12 @@ private fun handleResponse(msg: String, code: Int): String {
  */
 private fun returnMethod(a: Int, b: Int): (String, Int) -> String {
     val firstSum = a + b
-    return { aa: String, bb: Int ->
-        println("$a+$b=?")
-        val sum = aa + bb + firstSum
-        sum
-    }
-    // return ::handleResponse
+//    return { aa: String, bb: Int ->
+//        println("$a+$b=?")
+//        val sum = aa + bb + firstSum
+//        sum
+//    }
+     return ::handleResponse
 }
 
 /**
