@@ -113,6 +113,39 @@ class KotlinVararg<T>(vararg _objs: T, val isMap: Boolean) {
 
 [具体对应的类是KotlinVararg.kt]
 
+### 11.infix 中缀表达式
+
+* 通过在方法前添加`infix`得到一个中缀表达式,例如 `mapOf("key1" to "value1")`，这里的`to`就是有个中缀表达式，其源码实现如下：
+
+``` 
+public infix fun <A, B> A.to(that: B): Pair<A, B> = Pair(this, that)
+```
+
+* 中缀表达式的使用方式为[对象1 表达式符 对象2]
+* 得到一个中缀表达式的前提条件：
+    - 必须为成员函数或者扩展函数；
+    - 必须只有一个参数
+    - 参数不能为可变参数或者默认参数
+* 一个中缀表达式的实现过程：
+    - 必须对对象1进行扩展函数
+    - 必须将对象2作为参数传入
+
+``` 
+data class FakePair<A, B>(var a: A, var b: B) {
+
+}
+//实现一个中缀表达式
+infix fun <A, B> A.toPair(b: B): FakePair<A, B> =
+    FakePair(this, b)
+//具体的使用方式：
+fun main() {
+    val pair: FakePair<String, String> = "aaa" toPair "bbb"
+    println(pair.toString())
+}  
+```
+
+[具体对应的类是KotlinInfix.kt]
+
 ## 二、函数类型
 
 在kotlin中可以将函数作为一种数据类型。数据类型的表示形式为`(输入参数的数据类型)->返回值的数据类型`，例如`(String,Int)->String`
@@ -619,6 +652,32 @@ val String.name: String
 
 * [定义方式] `fun 类名?.方法名`
 
-  [具体对应的类是KotlinExtension.kt]
+[具体对应的类是KotlinExtension.kt]
+
+### 4.扩展文件
+
+* 将所有的扩展函数单独写到一个文件中，在使用这些扩展函数的时候将文件导入直接使用。
+* 一般里面的扩展函数都是public，否则无法调用到。
+* 在写扩展函数的时候，尽量对父类进行扩展，方便子类都能使用该扩展函数。
+* 在使用扩展文件的时候，若不在同一个包下面，需要导入，例如
+
+```
+import com.wj.kotlin.randomItemValuePrintln
+```
+
+* 支持重命名扩展，可以使得代码更简洁，例如：
+
+```
+import com.wj.kotlin.randomItemValuePrintln as r
+```
+
+这样可以直接使用`r`代替`randomItemValuePrintln`扩展函数，如下：
+
+```  
+    //list.randomItemValuePrintln()
+    list.r()
+```
+
+[具体对应的类是KotlinExtension.kt和KotlinExtensionFile.kt]
 
 ## 八、
