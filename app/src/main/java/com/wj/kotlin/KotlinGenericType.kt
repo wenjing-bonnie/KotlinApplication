@@ -81,6 +81,7 @@ fun xingbian() {
     var dogs: Array<Dog> = arrayOf(Dog(), Dog(), Dog())
     //所以在前面添加out就可以
     var animals: Array<out Animal> = dogs
+    var animals2: Array<*> = dogs
 
     //使用处型变
     var animals1: Array<Animal> = arrayOf(Animal(), Animal(), Animal())
