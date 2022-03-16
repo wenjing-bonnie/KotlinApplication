@@ -10,6 +10,7 @@ package com.wj.kotlin
  * 代码结构通常是链式调用、lambda 嵌套，并且接近于日常使用的英语句子。体现代码的整洁之道
  */
 
+
 class Context {
     val info = "1234"
     val name = "abc"

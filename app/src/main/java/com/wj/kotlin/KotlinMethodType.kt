@@ -124,6 +124,7 @@ private fun handleResponse(msg: String, code: Int): String {
     return "msg:$msg , code:${code}"
 }
 
+
 /**
  * （3实例）
  * 返回一个函数类型的返回值
@@ -135,7 +136,7 @@ private fun returnMethod(a: Int, b: Int): (String, Int) -> String {
 //        val sum = aa + bb + firstSum
 //        sum
 //    }
-     return ::handleResponse
+    return ::handleResponse
 }
 
 /**
