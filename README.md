@@ -20,11 +20,11 @@
     - (1)安全操作符?：例如`name?.length`。当name不为null的时候，才执行该代码；
     - (2)安全调用let：例如
 
-    ```
-    name?.let {
-        println(it.length)
-    }
-    ```
+      ```
+      name?.let {
+          println(it.length)
+      }
+      ```
     - (3)断言操作符!!：例如`name!!.length`，不管name是不是为null，都会执行该代码；若为null时，则抛出异常。所以只有100%确定不为null的时候才能使用。
     - (4)if语句：例如 `if(name == null)`
     - (5)`checkNotNull()`或`requireNotNull()`：在为null的时候抛出异常。
@@ -93,6 +93,25 @@ fun whenExpression(week: Int) {
 * 某些java方法恰好是kotlin的关键字，如`is`
 
 [具体对应的类是KotlinContent.kt]
+
+### 10.vararg
+
+* 用来接收多个动态参数
+
+``` 
+class KotlinVararg<T>(vararg _objs: T, val isMap: Boolean) {
+    /**
+     * 创建objs来接收_objs。
+     * 因为_objs是一个动态参数，需要通过out设置接收的这个objs只能可读，不能修改
+     */
+    var objs: Array<out T> = _objs
+    
+}    
+```
+
+那么此时的`_objs`就是一个动态参数，可以动态添加`_objs`中的内容。所以当在使用Array来接收该参数的时候，需要设置该成员变量为只读，即使用`out`来修饰该类型。
+
+[具体对应的类是KotlinVararg.kt]
 
 ## 二、函数类型
 
@@ -543,4 +562,34 @@ val c3: Consumer<Dog> = ConsumerClass()
 * [使用处型变] ----------------- end ----------------
 * [类型投影 2] 星投影被称为另外一种类型投影，用`*`来表示
 * 适用于泛型参数的类型不重要的场景
-* [类型投影] ----------------- end ----------------  
+* [类型投影] ----------------- end ----------------
+
+[具体对应的类是KotlinGenericType.kt]
+
+## 七、扩展函数
+
+* [应用场景] 可以比较方便在开源框架或者已有的系统类的基础上动态增加方法。
+* [定义方式] `fun 类名.方法名`
+* [优先级]
+    - 若重复定义类中已有的方法，则覆盖已有的方法，并且优先使用。
+    - 若同时添加相同名字的扩展函数，则编译不通过，此种情况不允许。
+    - 可以对超类Any进行增加扩展函数，那么所有的类都会增加相应的功能，尽量减少这种方式。
+
+``` 
+fun StringBuffer.length(): Int {
+    println(this)
+    return 3
+}
+```  
+
+* 如果还想对一系列的类都增加扩展函数，那么可以采用通过对泛型增加扩展函数。
+
+```
+fun <T> T.show() = println("${if (this is String) "是String" else " 不是String"}")
+```
+
+* 这里有个小提示：哪个类或者变量执行 `.`操作，那么后面引用的`this`就是这个类或者变量
+
+[具体对应的类是KotlinExtension.kt]
+
+## 八、
