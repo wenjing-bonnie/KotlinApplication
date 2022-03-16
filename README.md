@@ -155,6 +155,10 @@ fun main() {
 像Int/String一样，可以直接将函数赋值给一个变量。有两种方式：
 
 * (1)lambda表达式（本质就是一个匿名函数），其中最后一行代码为方法的返回值。
+    - 其形式为`{ x:Int,y:Int(parameters) -> x+y(body)}`
+    - lambda表达式如果作为函数的最后一个参数，那么就可以直接放在括号外面，并且可以省略括号。即`person.maxBy({ p:Person -> p.age })`
+      可以简写为`person.maxBy{ p:Person -> p.age }`
+    - lambda表达式作为形参声明时，可以携带接收者（也就是扩展函数）。即`String(接收者).(Int,Int)(参数类型)->Unit(返回值)`
 
 ```
     val method: (Int) -> String = { a: Int ->
@@ -233,7 +237,24 @@ fun main() {
 }
 ```
 
-【TODO 遗留问题：函数类型的返回值的应用场景是什么呢？？？？？】
+## 4.高阶函数
+
+当一个函数作为输入参数或者返回值时称为高阶函数。
+
+## 5.invoke约定
+
+可以让对象像函数一样直接调用。
+
+``` 
+class Person(val name:String){
+    operator fun invoke(){
+        println("my name is $name")
+    }
+} 
+//使用对象
+val person = Person()
+person()
+```
 
 [具体对应的类是KotlinMethodType.kt]
 
@@ -507,24 +528,24 @@ private fun also(reader: BufferedReader) {
 * ()：一个普通的函数，在函数体内只能通过T的外部变量来访问其变量和函数。
 * 自定义let。其特点：持有的是it，返回的是匿名函数的最后一行代码。思路如下：
     - 对I的扩展函数 -> 定义为`fun I.mLet()`。
-    - 传入的lamdba表达式需要具备：持有的是it，返回值为最后一行代码的类型 -> 定义输入参数为`lambda: (I) -> O`。
-    - 采用了lamdba表达式作为传入参数，为了避免创建额外的对象 -> 该函数使用`inline`进行修饰。
-    - 由于调用let的时候需要返回匿名函数的最后一行代码的返回值 -> 直接采用lamdba的返回值。
+    - 传入的lambda表达式需要具备：持有的是it，返回值为最后一行代码的类型 -> 定义输入参数为`lambda: (I) -> O`。
+    - 采用了lambda表达式作为传入参数，为了避免创建额外的对象 -> 该函数使用`inline`进行修饰。
+    - 由于调用let的时候需要返回匿名函数的最后一行代码的返回值 -> 直接采用lambda的返回值。
 
 ``` 
-private inline fun <I, O> I.mLet(lambda: (I) -> O) = lambda(this)
+private inline fun <I, O> I.mLet(llambda: (I) -> O) = lambda(this)
 ```  
 
 * 自定义apply。奇特的：持有this，返回的对象本身。思路如下：
     - 对I的扩展函数 -> 定义为` fun I.mApply()`
-    - 传入的lamdba表达式需要具备：持有this，无需返回值。`mApply()`
-      返回的是对象本身，并不是该lamdba表达式返回值。另外这个lamdba表达式要能够直接访问到其对象的成员变量和函数，所以需要将输入参数定义为一个扩展函数 ->
+    - 传入的lambda表达式需要具备：持有this，无需返回值。`mApply()`
+      返回的是对象本身，并不是该lambda表达式返回值。另外这个lambda表达式要能够直接访问到其对象的成员变量和函数，所以需要将输入参数定义为一个扩展函数 ->
       定义输入参数为`lambda: I.() -> Unit`。
-    - 采用了lamdba表达式作为传入参数，为了避免创建额外的对象 -> 该函数使用`inline`进行修饰。
+    - 采用了lambda表达式作为传入参数，为了避免创建额外的对象 -> 该函数使用`inline`进行修饰。
     - 由于调用apply的时候需要返回对象本身 -> 该`mApply()`直接返回this。
 
 ``` 
-private inline fun <I> I.mApply(lambda: I.() -> Unit): I {
+private inline fun <I> I.mApply(llambda: I.() -> Unit): I {
     //lambda(this) //默认就有this，所以可以直接不添加this
     lambda()
     return this
