@@ -17,11 +17,20 @@ fun KotlinExtension.show() {
     println("name $name, age ${age}")
 }
 
+//对可空类型的扩展函数
+fun KotlinExtension?.show1() {
+    this ?: println("1222")
+    println("name $name, age ${this?.age}")
+}
+
 
 fun StringBuffer.length(): Int {
     println(this)
     return 3
 }
+
+val String.name: String
+    get() = "123"
 
 /**
  * 任何一种类型都属于泛型，包括方法。
@@ -44,4 +53,6 @@ fun main() {
 
     "liu".show()
     buffer.show()
+
+    println("liu".name)
 }

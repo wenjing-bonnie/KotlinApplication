@@ -10,10 +10,10 @@ fun main() {
     name = null
     name?.mLet {
         println("$it")
-    }?: oo()//println("is null")
+    } ?: oo()//println("is null")
 }
 
-fun oo(){
+fun oo() {
     println("具名函数")
 }
 
@@ -23,3 +23,10 @@ fun oo(){
  * 返回最后一行代码
  */
 private inline fun <I, O> I.mLet(lambda: (I) -> O) = lambda(this)
+
+/**
+ * 持有this，返回的对象本身
+ */
+private inline fun <I> I.mApply(lambda:(I)->(I)) {
+
+}

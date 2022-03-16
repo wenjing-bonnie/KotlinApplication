@@ -454,6 +454,19 @@ private fun also(reader: BufferedReader) {
 
 [具体对应的类是KotlinApplyLet.kt]
 
+### 6.总结
+
+* [apply和also]
+    - [相同点] 都是返回对象本身
+    - [不同点] 匿名函数持有对象不一样：apply持有的this；also持有的是it
+    - [应用场景] 链式调用。apply持有this，可以直接调用其自身的方法和成员变量，用于对象初始化；
+* [run和let]
+    - [相同点] 都是返回的匿名函数的最后一行代码的类型
+    - [不同点] 匿名函数持有对象不一样：run持有的this；let持有的是it
+    - [应用场景]let与空合并符进行null逻辑处理，代替if。run限定作用域
+* [with]
+    - 同run，只不过是需要将对象传入到with
+
 ## 六、泛型
 
 ### 1.声明泛型类
@@ -566,7 +579,9 @@ val c3: Consumer<Dog> = ConsumerClass()
 
 [具体对应的类是KotlinGenericType.kt]
 
-## 七、扩展函数
+## 七、扩展函数和扩展属性
+
+### 1.扩展函数
 
 * [应用场景] 可以比较方便在开源框架或者已有的系统类的基础上动态增加方法。
 * [定义方式] `fun 类名.方法名`
@@ -590,6 +605,20 @@ fun <T> T.show() = println("${if (this is String) "是String" else " 不是Strin
 
 * 这里有个小提示：哪个类或者变量执行 `.`操作，那么后面引用的`this`就是这个类或者变量
 
-[具体对应的类是KotlinExtension.kt]
+### 2.扩展属性
+
+* [应用场景] 可以比较方便在开源框架或者已有的系统类的基础上动态增加成员变量
+* [定义方式] `val/var 类名.成员变量:数据类型 get() = `
+
+``` 
+val String.name: String
+    get() = "123"
+```
+
+### 3.对可空类型的扩展函数
+
+* [定义方式] `fun 类名?.方法名`
+
+  [具体对应的类是KotlinExtension.kt]
 
 ## 八、
