@@ -12,6 +12,12 @@ public class JavaSingletonLazySync {
                 singletonLazySync = new JavaSingletonLazySync();
             }
         }
+
         return singletonLazySync;
+    }
+
+    private void ge() {
+       // KotlinSpecialClassKt cls = new KotlinSpecialClassKt();
+
     }
 }

@@ -268,6 +268,32 @@ class KotlinVararg<T>(vararg _objs: T, val isMap: Boolean) {
 ### 11.kotlin调用java
 
 * 在kotlin调用java代码时，若是`String!`类型的时候，在使用的时候，必须采用`?.xxx`，并且添加类型限定符`String ?`。
+* `@file:JvmName("NewName")`
+    - 默认的会将`KotlinSpecial.kt`在生成字节码的时候，会自动生成`class KotlinSpecialKt{}`，供Java来调用。
+    - 而`@file:JvmName("NewName")`在编译阶段，会将当前`KotlinSpecialKt`类的名字修改为`NewName`。在java中可直接通过`NewName`
+      来访问`KotlinSpecialKt`
+      类中的内容。
+    - 但是要注意的是**该注解必须写在`package xxx`的前面**。
+    - 但是如果在同一包名下的两个kt文件都被注解了相同的名字，在编译的时候会报错。通过在`@file:JvmName("NewName")`
+      后添加`@file:JvmMultifileClass`，这样就会把这两个类合并到同一个类中。
+* `@JvmField`
+    - 可以val/var定义的成员变量，在java中直接调用，而不需要调用getXX()。
+    - 对于`val nameField: String = "zhangsan"`，经过编译器生成的字节码中，代码如下：
+    ``` 
+     private static String nameField = "zhangsan";
+     public static final String getNameField(){
+        return nameField
+     }
+     public static final void setNameField(String var0){
+        this.nameField = var0
+     }
+    ```
+  那么对于调用`nameField`只能通过`getNameField()`，并且`getNameField()`用`final`来修饰表示不可修改。 但是如果添加`@JvmField`
+  之后，经过编译器生成的字节码如下：
+  ``` 
+  public static String nameField = "zhangsan";
+  ```
+  并且不在含有get/set方法，那么此时就可以直接通过`.`的方式来调用该`nameField`。
 
 [具体对应的类是KotlinVararg.kt]
 
