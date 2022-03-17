@@ -7,8 +7,6 @@ package com.wj.kotlin
  * create by wenjing.liu at 2022/3/13
  * 特殊的几种类
  */
-@JvmField
-var nameField: String = "zhangsan"
 
 /**
  * 1.使用数据类是为了可以直接使用里面的方法

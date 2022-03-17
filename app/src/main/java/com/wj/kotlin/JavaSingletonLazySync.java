@@ -17,7 +17,14 @@ public class JavaSingletonLazySync {
     }
 
     private void ge() {
-       // KotlinSpecialClassKt cls = new KotlinSpecialClassKt();
-
+        KotlinToJavaKt kt = new KotlinToJavaKt();
+        //kt.getNameField();
+        System.out.println(kt.nameField);
+        kt.show("zhangsan", 12, 'F');
+        kt.show("zhangsan");
+        //InnerClass.Companion.getName();
+        //InnerClass.Companion.show();
+        String name = InnerClass.name;
+        InnerClass.show();
     }
 }

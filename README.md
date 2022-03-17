@@ -265,6 +265,8 @@ class KotlinVararg<T>(vararg _objs: T, val isMap: Boolean) {
 
 那么此时的`_objs`就是一个动态参数，可以动态添加`_objs`中的内容。所以当在使用Array来接收该参数的时候，需要设置该成员变量为只读，即使用`out`来修饰该类型。
 
+[具体对应的类是KotlinVararg.kt]
+
 ### 11.kotlin调用java
 
 * 在kotlin调用java代码时，若是`String!`类型的时候，在使用的时候，必须采用`?.xxx`，并且添加类型限定符`String ?`。
@@ -288,14 +290,23 @@ class KotlinVararg<T>(vararg _objs: T, val isMap: Boolean) {
         this.nameField = var0
      }
     ```
-  那么对于调用`nameField`只能通过`getNameField()`，并且`getNameField()`用`final`来修饰表示不可修改。 但是如果添加`@JvmField`
-  之后，经过编译器生成的字节码如下：
-  ``` 
-  public static String nameField = "zhangsan";
-  ```
+    - 那么对于调用`nameField`只能通过`getNameField()`，并且`getNameField()`用`final`来修饰表示不可修改。 但是如果添加`@JvmField`
+      之后，经过编译器生成的字节码如下：
+    ``` 
+        public static String nameField = "zhangsan";
+     ```
   并且不在含有get/set方法，那么此时就可以直接通过`.`的方式来调用该`nameField`。
+* `@JvmOverloads`
+    - kotlin中声明方法的时候，可以给定输入参数默认值。在调用该方法时，可以只传入非默认值的参数。但是java却不能直接调用，不传默认参数。
+    - 通过在方法上添加`@JvmOverloads`，在生成字节码的时候，会进行方法重载，自动生成一个只有非默认参数的方法，供java来调用。
+* ` @JvmStatic`
+    - 对于kotlin的`companion object {}`伴生对象，kotlin可以直接通过`类名.`的方式直接调用。在生成字节码的时候，会将`companion`
+      生成静态类，所以在java中调用的时候，只能`类名.Companion.`进行调用。
+    - 通过对`companion object {}`里的成员变量添加`@JvmField`和对方法添加 ` @JvmStatic`
+      。在生成字节码的时候，会将`companion object {}`所在类中生成对应方法的静态方法，在静态方法中去调用`类名.Companion.`，而java中直接通过`类名.`
+      的方式直接调用。
 
-[具体对应的类是KotlinVararg.kt]
+[具体对应的类是KotlinToJava.kt]
 
 ### 11.infix 中缀表达式
 
