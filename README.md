@@ -265,6 +265,10 @@ class KotlinVararg<T>(vararg _objs: T, val isMap: Boolean) {
 
 那么此时的`_objs`就是一个动态参数，可以动态添加`_objs`中的内容。所以当在使用Array来接收该参数的时候，需要设置该成员变量为只读，即使用`out`来修饰该类型。
 
+### 11.kotlin调用java
+
+* 在kotlin调用java代码时，若是`String!`类型的时候，在使用的时候，必须采用`?.xxx`，并且添加类型限定符`String ?`。
+
 [具体对应的类是KotlinVararg.kt]
 
 ### 11.infix 中缀表达式

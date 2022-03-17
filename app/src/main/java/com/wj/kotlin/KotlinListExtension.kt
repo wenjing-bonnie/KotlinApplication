@@ -89,7 +89,16 @@ fun zip1() {
 //            (key, ualue) ->
 //        println("${key} , ${ualue}")
     }
+}
 
+fun zip2() {
+    val list = listOf("zhangsan", "lisi", "hanmeimei")
+    val list1 = listOf(12, 34, 23)
+    val newList = list.zip(list1)
+    val result = newList.map {
+        "name is ${it.first} , age is ${it.second} ; "
+    }
+    println(result)
 }
 
 fun main() {
@@ -97,4 +106,5 @@ fun main() {
     flatMap1()
     filter1()
     zip1()
+    zip2()
 }
