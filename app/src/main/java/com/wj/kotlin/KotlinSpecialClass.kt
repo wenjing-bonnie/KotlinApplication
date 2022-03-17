@@ -88,10 +88,43 @@ class JobSummary(val job: JobSealed) {
         }
 }
 
+class SingletonLazy {
+    companion object {
+        private var instance: SingletonLazy? = null
+            get() {
+                if (field == null) {
+                    field = SingletonLazy()
+                }
+                return field
+            }
+
+        @Synchronized //添加同步锁之后 懒汉式 安全
+        fun getInstanceAction() = instance!!
+
+
+    }
+
+    fun show() {
+        println("show")
+    }
+}
+
+class SingletonLazySync private constructor() {
+    companion object {
+        val instance: SingletonLazySync by lazy(mode = LazyThreadSafetyMode.SYNCHRONIZED) { SingletonLazySync() }
+    }
+
+    fun show(){
+        println("show")
+    }
+}
+
 
 fun main() {
     println(AddClass(1, 2) + AddClass(2, 3))
     println(Week.星期一 is Week)
     Jobs.DOCTOR.job()
     println(JobSummary(JobSealed.POLICE("张三")).showJob())
+    SingletonLazy.getInstanceAction().show()
+    SingletonLazySync.instance.show()
 }

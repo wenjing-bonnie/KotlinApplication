@@ -514,9 +514,49 @@ val list1 = list.flatMap {
 
 ### 4.单例类 -> 类似于java的static类
 
-* `object 类名`声明单例类，只有一个该类的实例，此时`init{}`为静态代码块。在转换成字节码时，该类会通过`public static final`进行修饰。
-* `companion object{}`声明伴生对象，`{}`里面可定义val/var/fun。该伴生对象只会加载一次。在转换成字节码时，该类会通过`public static final`
+* `object 类名`声明单例类(这个就是[饿汉模式])，只有一个该类的实例，此时`init{}`为静态代码块。在转换成字节码时，该类会通过`public static final`进行修饰。
+* `companion object{}`声明伴生对象(这个就是[懒汉模式])，`{}`
+  里面可定义val/var/fun。该伴生对象只会加载一次。在转换成字节码时，该类会通过`public static final`
   进行修饰。
+
+``` 
+class SingletonLazy {
+    companion object {
+        private var instance: SingletonLazy? = null
+            get() {
+                if (field == null) {
+                    field = SingletonLazy()
+                }
+                return field
+            }
+        fun getInstanceAction() = instance!!
+    }
+
+    fun show() {
+        println("show")
+    }
+}
+//就可以直接调用单例
+    SingletonLazy.getInstanceAction().show()
+```  
+
+* [懒汉安全模式] 只需要在上面的`getInstanceAction()`添加`@Synchronized`即可。
+* [懒汉双重模式] java中在实例定义的时候添加`volatile`保证其他线程修改的时候，可以同步到另外线程+获取实例方法中添加`synchronized`
+  保证每次只有一个线程可以修改。在kotlin中的代码如下：
+
+``` 
+class SingletonLazySync private constructor() {
+    companion object {
+        val instance: SingletonLazySync by lazy(mode = LazyThreadSafetyMode.SYNCHRONIZED) { SingletonLazySync() }
+    }
+
+    fun show(){
+        println("show")
+    }
+}
+//可以直接使用instance
+SingletonLazySync.instance.show()
+```  
 
 ### 5.内部类和嵌套类
 
