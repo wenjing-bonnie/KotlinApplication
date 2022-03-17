@@ -16,7 +16,8 @@ public class JavaSingletonLazySync {
         return singletonLazySync;
     }
 
-    private void ge() {
+/*    private void ge() {
+        //不能调用含有扩展函数的类，因为在KotlinRxjava.kt中对所有的T进行了扩展，所以此时这里编译不通过
         KotlinToJavaKt kt = new KotlinToJavaKt();
         //kt.getNameField();
         System.out.println(kt.nameField);
@@ -26,5 +27,5 @@ public class JavaSingletonLazySync {
         //InnerClass.Companion.show();
         String name = InnerClass.name;
         InnerClass.show();
-    }
+    }*/
 }
