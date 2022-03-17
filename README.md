@@ -480,8 +480,13 @@ val list1 = list.flatMap {
 * `对象 is class`：判断对象是不是class的对象。
 * `对象 as class`：将对象转换成class对象。
 * 懒加载有两种方式：
-    - 使用`lateinit var lazy1: String`，在使用的时候必须进行手动初始化。
-    - 惰性加载，在使用该变量的时候，会主动加载，例如：
+    - `lateinit`：用于var修饰的变量。在生命周期流程中进行获取或初始化变量。例如`lateinit var lazy1: String`，**在使用的时候必须进行手动初始化**。
+    - `lazy()` ：用于val修饰的变量。惰性加载,在使用该变量的时候，会主动加载初始化变量的方法，即lambda表达式里面的内容。
+        - 接收的是一个lambda表达式，并且最后一行代码必须返回一个Lazy<T>的实例函数。
+        - 在构造函数中含有一个枚举mode：
+            - `LazyThreadSafetyMode.SYNCHRONIZED`：初始化变量的时候，进行双重锁检查，保证该值只在一个线程中计算，并且所有的线程中都会得到相同的值。
+            - `LazyThreadSafetyMode.PUBLICATION`：多个线程会同时执行，初始化属性的函数会被多次调用，但只有一个返回的值当作委托属性的值。
+            - `LazyThreadSafetyMode.NONE`：没有双重锁检查，不能用在多线程。
 
 ```
     val lazy2 by lazy {
@@ -490,6 +495,8 @@ val list1 = list.flatMap {
     private fun lazyVar(): String {
         return "1222"
     }
+    //含有mode的惰性加载
+    val instance: SingletonLazySync by lazy(mode = LazyThreadSafetyMode.SYNCHRONIZED) { SingletonLazySync() }
 ```
 
 ### 3.接口类的实例化
