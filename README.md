@@ -1057,7 +1057,14 @@ import com.wj.kotlin.randomItemValuePrintln as r
 
 ### 4.协程上下文CoroutineContext
 
-* Job(协程唯一标识)+CoroutineDispatcher(调度器)+ContinuationInterceptor(拦截器)+CoroutineName(协程名称)
+* Job(协程唯一标识)：创建协程的返回值及协程的工作任务。
+* CoroutineDispatcher(调度器)：
+    - `Dispatchers.Default`：默认。线程池，适合处理后台计算。CPU密集型任务调度器。
+    - `Dispatchers.IO`：IO调度器。适合执行IO操作，IO密集型调度器。
+    - `Dispatchers.Main`：UI调度器。根据不同的平台初始化成对应的UI线程
+    - `Dispatchers.Unconfined`：不指定线程，如果子协程切换线程，接下来的代码也在该子线程中执行。
+* ContinuationInterceptor(拦截器)
+* CoroutineName(协程名称)
 
 ### 5.协程作用域
 
