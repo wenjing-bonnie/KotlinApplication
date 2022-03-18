@@ -90,8 +90,18 @@ private fun first() {
         println("${coroutineContext.job}")
         delay(1000)
         println("结束第一个coroutine:  ${Thread.currentThread().name}")
+
+        coroutineScope {
+            launch {
+                println("进入coroutineScope :  ${Thread.currentThread().name}")
+            }
+        }
     }
-    //println("${job.}")
+    job.children.map {
+        println("子协程为：${it}")
+    }
+
+    println("子协程个数为：${job.children.count()}")
     println("跳出了第一个coroutine:  ${Thread.currentThread().name}")
     //  Thread.sleep(2000)
     //阻塞当前线程的协程，会等着里面的代码执行完毕。    等价于Thread.sleep(2000)

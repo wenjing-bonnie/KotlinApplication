@@ -1055,20 +1055,13 @@ import com.wj.kotlin.randomItemValuePrintln as r
     - 开发人员控制协程的切换。协程在空闲的时候（如等待IO、网络数据未到达），放弃控制权，然后让所在线程去执行其他协程，在合适的时间在唤醒协程。
       相比较于线程是通过阻塞当前线程，此时只是空耗CPU，而不执行任何计算任务，造成浪费。
 
-### 4.协程的挂起
-
-* 通过对函数前添加`suspend`修饰符仅是提醒该函数需要挂起，里面要配合`withContext()`来实现一个挂起函数。
-* 该挂起函数可以自动的切换线程，并且可以自动的挂起和恢复。
-    - 每一次有主线程到IO线程，都是一次协程挂起suspend；每一次的IO线程到主线程，都是一次协程的恢复resume。
-    - 挂起只是将执行流程转移到了其他线程，主线程并未被阻塞。
-* 如果挂起函数及里面的调用的函数都必须是挂起函数。
-
-### 5.协程上下文CoroutineContext
+### 4.协程上下文CoroutineContext
 
 * Job(协程唯一标识)+CoroutineDispatcher(调度器)+ContinuationInterceptor(拦截器)+CoroutineName(协程名称)
 
-### 6.协程作用域
+### 5.协程作用域
 
+* 作用域可以并列或包含，组成一个树状结构。
 * 协程必须在作用域中才能启动。作用域中定义了一些父子协程的规则，kotlin协程通过作用域来管控域中的所有协程。
     - 顶级作用域：没有父协程的协程所在的作用域。
     - 协同作用域：协程中启动新协程(子协程)，此时子协程所在的作用域默认为协同作用域，子协程抛出的未捕获异常都将传递给父协程处理，父协程同时也会被取消；
@@ -1077,60 +1070,70 @@ import com.wj.kotlin.randomItemValuePrintln as r
     - 父协程被取消，所有的子协程均被取消；
     - 父协程只有等子协程执行完毕后才会进入最终完成状态，而不管父协程本身的协程体是否已经执行完。
     - 子协程会继承父协程上下文的元素，如果有相同的key，则被覆盖。
-* 在实际开发中，很少需要一个全局协程
+* 创建作用域的几种方式：
+    - `GlobalScope`：[全局的作用域]。单例，声明周期贯穿整个JVM。需要注意内存泄漏。在实际开发中，很少需要一个全局协程。
+
+    - 实现`CoroutineScope`：[自定义的作用域]。需要自定义类来实现`CoroutineScope`，也可通过委托`by MainScope`来交由委托类实现。
+      还需要实现里面的`coroutineContext`成员变量。如
+
+    ``` 
+        override val coroutineContext: CoroutineContext
+            get() = EmptyCoroutineContext
+    ```
+    - 通过`val mainScope = MainScope()`快速创建[基于Android主线程协程的作用域]
+      。可以方便的控制所有它范围内的协程的取消。`MainScope`默认CoroutineContext创建是`SupervisorJob()` 和 `Dispatchers.Main`
+      。如果还想在为CoroutineContext添加其他的元素，可通过如下的方式`val scope = MainScope() + CoroutineName("MyActivity").`
+      。`MainScope`作用域的源码如下：
+
+    ``` 
+        public fun MainScope(): CoroutineScope = ContextScope(SupervisorJob() + Dispatchers.Main)
+    ```
+    - 通过 `coroutineScope {}`和`supervisorScope {}`创建[子作用域]。**只能在已有的协程作用域内调用**
+        - `coroutineScope {}`在子作用域中出现异常，父协程和子协程都会被取消(即[协同作用域])。
+        - `supervisorScope {}`出现异常的时候不会影响到其他的子协程(即[主从作用域])。
+
+### 6.如何创建一个协程
+
+* 通过[协程作用域函数]来创建协程。协程作用域确定协程间的父子关系以及取消或者异常处理。
+    - 创建不阻塞的当前线程的协程
+        - `launch{}`：返回`Job`，用于协程监督与取消，用于无返回值的场景。如`GlobalScope.launch{}`创建一个[全局的协程]
+          ；`mainScope.launch{}`创建是[Android主线程作用域的协程]。
+        - `async{ return@async  xxxx }`：返回`Job`的子类`Deferred`，可通过`await()`获取完成时的返回值。
+    - 创建阻塞当前线程的协程
+        - `runBlocking {}`创建一个[阻塞的协程]。阻塞当前线程，知道里面的代码执行完毕。等价于`Thread.sleep`
 
 ### 7.协程取消
 
-*
-
-### 8.如何创建一个协程
-
-* `GlobalScope.launch`创建一个[全局的协程]。该`GlobalScope`为单例，声明周期贯穿整个JVM，注意内存泄漏
-* `runBlocking {}`创建一个[阻塞的协程]。阻塞当前线程，知道里面的代码执行完毕。等价于`Thread.sleep`
-* 继承`CoroutineScope`创建一个[自定义的作用域]。只需要实现里面的`coroutineContext`成员变量即可。如
-
-``` 
-    override val coroutineContext: CoroutineContext
-        get() = EmptyCoroutineContext
-```
-
-* 通过`val mainScope = MainScope()`快速创建[基于Android主线程协程的作用域]。可以方便的控制所有它范围内的协程的取消。
-
-``` 
-public fun MainScope(): CoroutineScope = ContextScope(SupervisorJob() + Dispatchers.Main)
-```
-
-默认的会创建一个`SupervisorJob()` 和 `Dispatchers.Main`
-类型的CoroutineContext，如果还想在为CoroutineContext添加其他的元素，可通过如下的方式`val scope = MainScope() + CoroutineName("MyActivity").`
-
-* 通过 `coroutineScope {}``supervisorScope {}`创建[子作用域]。**只能在已有的协程作用域内调用**
-  。前者在子作用域中出现异常，父协程和子协程都会被取消。而后者出现异常的时候不会影响到其他的子协程。
-* 通过[协程作用域函数]来创建协程。协程作用域确定协程间的父子关系以及取消或者异常处理。
-    - 创建不阻塞的当前线程的协程
-        - `launch{}`：返回一个`Job`，用于协程监督与取消，用于无返回值的场景。
-        - `async{ return@async  xxxx }`：返回一个`Job`的子类`Deferred`，可通过`await()`获取完成时的返回值。
-    - 创建阻塞当前线程的协程
-
-### 9.Job(作业)->创建的协程返回值、协程的工作任务
-
-* `Job`的生命周期包括：New(新建)、Active(活跃)、Completing(完成中)(await children)、Completed(已完成)、Cancelling(取消中)(
-  await children)、Cancelled(已取消)
-    - 协程状态相关的API
-        - `isActive`：是否存活
-        - `isCancelled`：是否取消
-        - `isCompleted`:是否完成
-        - `children`：所有子作业
-    - 协程控制相关API
-        - `cancel()`：取消协程。
-            - 同一作用域中，会取消它的所有子协程。但不会影响到其余兄弟协程。当该作用域已经取消之后，则不能再次启动新的协程。
-            - 子线程会通过抛出`CancellationException`异常而被取消，父协程是不需要任何额外操作。默认的会创建一个`CancellationException`
-              ，也可以新建传入。
-            - 执行取消操作之后，不会立即停止，进入到取消中，只有任务完成才会变成已取消。所以在协程中要定期检查协程是否处于`isActive`
-        - `join()`：阻塞当前线程直到协程执行完毕
-        - `cancelAndJoin()`：取消并等待协程完成
-        - `cancelChildren()`：取消所有的子协程
-        - `attachChild(child:ChildJob)`：附加一个子协程到当前协程上
+* 协程的取消通过协程的返回值`Job`来操作。
+* `Job`(作业)：创建的协程返回值、协程的工作任务
+* `Job`的生命周期：New(新建)、Active(活跃)、Completing(完成中)(await children)、Completed(已完成)、Cancelling(
+  取消中)(await children)、Cancelled(已取消)
+* 在`Job`中协程状态相关的API
+    - `isActive`：是否存活
+    - `isCancelled`：是否取消
+    - `isCompleted`:是否完成
+    - `children`：所有子作业
+* 在`Job`中协程控制相关API
+    - `cancel()`：取消协程。
+        - 同一作用域中，会取消它的所有子协程。但不会影响到其余兄弟协程。当该作用域已经取消之后，则不能再次启动新的协程。
+        - 子线程会通过抛出`CancellationException`异常而被取消，父协程是不需要任何额外操作。默认的会创建一个`CancellationException`
+          ，也可以新建传入。
+        - 执行取消操作之后，不会立即停止，进入到取消中，只有任务完成才会变成已取消。所以在协程中要定期检查协程是否处于`isActive`
+    - `join()`：阻塞当前线程直到协程执行完毕
+    - `cancelAndJoin()`：取消并等待协程完成
+    - `cancelChildren()`：取消所有的子协程
+    - `attachChild(child:ChildJob)`：附加一个子协程到当前协程上
 * 对于Completing或Cancelling，会等着所有的子协程完成后，才会进入已完成或已取消状态
+
+### 8.协程的挂起
+
+* 通过对函数前添加`suspend`修饰符仅是提醒该函数需要挂起，需要在协程中执行该函数，里面要配合`withContext()`来实现一个挂起函数。
+* 该挂起函数可以自动的切换线程，并且可以自动的挂起和恢复。
+    - 每一次有主线程到IO线程，都是一次协程挂起suspend；每一次的IO线程到主线程，都是一次协程的恢复resume。
+    - 挂起只是将执行流程转移到了其他线程，主线程并未被阻塞。
+* 挂起函数及里面的调用的函数都必须是挂起函数。
+
+
     
   
     

@@ -14,37 +14,34 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         textView.setOnClickListener { view: View ->
             view.getTag()
         }
-        mainScope()
-        // val result = mainScope().await()
+        launch {
+            launchJob()
+            val result = ayncLaunchJob().await()
+            println("return result is $result")
+            coroutineScope()
+        }
+
     }
 
-
-    private fun mainScope(): Deferred<String> {
-
-        /**
-         * 主线程的 这个只能应用于Android的
-         */
+    private suspend fun coroutineScope() = coroutineScope {
         launch {
-            println("mainScope:  ${Thread.currentThread().name}")
-            launch(Dispatchers.IO) {
-                println("in scope :  ${Thread.currentThread().name}")
-                delay(1000)
-            }
-            delay(2000)
-            //创建一个子作用域。只能在已有的协程作用域中调用。出现异常时会抛出异常（父协程和子协程都会被取消）
-            coroutineScope {
-                println("coroutineScope :  ${Thread.currentThread().name}")
-            }
-            //出现异常的时候不会影响到其他子协程
-            supervisorScope {
-                println("supervisorScope :  ${Thread.currentThread().name}")
-            }
-
+            println("coroutineScope :  ${Thread.currentThread().name}")
         }
+    }
 
-        return async {
-            return@async "133e"
-        }
+    private suspend fun launchJob() = launch(Dispatchers.IO) {
+        // withContext() {
+        println("开启一个 launchJob 协程")
+        delay(1000)
+        println("launchJob ${Thread.currentThread().name}")
+        //  }
+    }
+
+    private suspend fun ayncLaunchJob() = async(Dispatchers.IO) {
+        println("开启一个 ayncLaunchJob 协程")
+        delay(2000)
+        println("ayncLaunchJob ${Thread.currentThread().name}")
+        return@async "returnResult"
     }
 
     override fun onDestroy() {
