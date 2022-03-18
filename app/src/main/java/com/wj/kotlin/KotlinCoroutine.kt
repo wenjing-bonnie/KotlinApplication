@@ -1,5 +1,8 @@
 package com.wj.kotlin
 
+import android.provider.Settings
+import kotlinx.coroutines.*
+
 /**
  * created by wenjing.liu at 2022/3/16
  *1.进程和线程
@@ -46,11 +49,17 @@ package com.wj.kotlin
  *
  *
  * 线程框架
- * 让异步调用像同步调用一样
- * 挂起：是指可以自动切回来的线程切换。
- * suspend ：是一个耗时操作，需要自动放到协程里处理，必须去调用别的挂起函数来
+ * 让异步并发任务，像同步调用一样
  *
- * suspend ，然后在代码里面添加withContext
+ *
+ * 挂起：是指可以自动切回来的线程切换。
+ * suspend ：是一个耗时操作，需要自动放到协程里处理，必须去调用别的挂起函数来。里面的函数也都要用suspend来修饰
+ *
+ * suspend是个提醒作用，告诉你现在这个函数需要挂起
+ * suspend ，然后在代码里面添加withContext来实现一个挂起函数
+ * 该挂起函数：要完成线程切换：每一次有主线程到IO线程，都是一次协程挂起（suspend）
+ *  每一次从IO线程到主线程，都是一次协程恢复健康(resume)
+ *  挂起和恢复是挂起函数特有的能力。普通函数是不具备的。挂起只是将线程执行流程转移到其他线程，主线程并未被阻塞
  *
  * 在java中耗时操作
  * 1）开子线程 处理耗时操作，通过回调返回
@@ -64,7 +73,41 @@ package com.wj.kotlin
  * 并行：同时执行很多事情。
  *
  *
+ * 1.上下文：Job(协程的唯一标识)+CoroutinesDispatcher(调度器)+ContinuationInterceptor(拦截器)+CoroutineName(协程名称)
+ *
  *
  */
-class KotlinCoroutine {
+
+/**
+ * first [kang ru ting]
+ */
+private fun first() {
+    println("即将进入第一个coroutine:  ${Thread.currentThread().name}")
+    //创建一个非阻塞的协程 为单例对象，生命周期贯穿整个JVM，警惕内存泄漏
+    // public object GlobalScope : CoroutineScope
+    val job = GlobalScope.launch {
+        println("进入第一个coroutine:  ${Thread.currentThread().name}")
+        println("${coroutineContext.job}")
+        delay(1000)
+        println("结束第一个coroutine:  ${Thread.currentThread().name}")
+    }
+    //println("${job.}")
+    println("跳出了第一个coroutine:  ${Thread.currentThread().name}")
+    //  Thread.sleep(2000)
+    //阻塞当前线程的协程，会等着里面的代码执行完毕。    等价于Thread.sleep(2000)
+    runBlocking {
+        println("进入阻塞:  ${Thread.currentThread().name}")
+        delay(2000)
+    }
+    println("休眠结束")
+}
+
+private suspend fun loadUserFromServer(): String {
+    var user = ""
+    //with
+    return user
+}
+
+fun main() {
+    first()
 }
