@@ -14,13 +14,18 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         textView.setOnClickListener { view: View ->
             view.getTag()
         }
-        launch {
+        //CoroutineStart.DEFAULT 默认的立即创建一个协程
+        val job = launch(start = CoroutineStart.LAZY) {
+            println("${this::class.javaObjectType}")
             launchJob()
             val result = ayncLaunchJob().await()
             println("return result is $result")
             coroutineScope()
-        }
+            supervisorScope()
 
+        }
+        job.start()
+        println("the job  ${job.children.count()}")
     }
 
     private suspend fun coroutineScope() = coroutineScope {
@@ -28,6 +33,14 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
             println("coroutineScope :  ${Thread.currentThread().name}")
         }
     }
+
+    private suspend fun supervisorScope() = supervisorScope {
+        launch {
+            println("supervisorScope :  ${Thread.currentThread().name}")
+        }
+    }
+
+
 
     private suspend fun launchJob() = launch(Dispatchers.IO) {
         // withContext() {

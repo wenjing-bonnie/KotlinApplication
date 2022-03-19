@@ -2,6 +2,11 @@ package com.wj.kotlin
 
 import android.provider.Settings
 import kotlinx.coroutines.*
+import java.util.concurrent.Executor
+import java.util.concurrent.Executors
+import kotlin.coroutines.Continuation
+import kotlin.coroutines.ContinuationInterceptor
+import kotlin.coroutines.CoroutineContext
 
 /**
  * created by wenjing.liu at 2022/3/16
@@ -112,6 +117,69 @@ private fun first() {
     println("休眠结束")
 }
 
+class LogInterceptor : ContinuationInterceptor {
+    override val key = ContinuationInterceptor
+    override fun <T> interceptContinuation(continuation: Continuation<T>): Continuation<T> {
+        return object : Continuation<T> {
+            override val context: CoroutineContext
+                get() = continuation.context
+
+            override fun resumeWith(result: Result<T>) {
+                println("result is ${result}")
+                continuation.resumeWith(result)
+            }
+
+        }
+    }
+}
+
+private fun lazy() = runBlocking {
+    println("1")
+    val job = launch(start = CoroutineStart.LAZY) {
+        println("2")
+    }
+    println("3")
+    delay(1000)
+    println("4")
+    job.cancel()
+
+    val supervisorJob = launch(CoroutineName("123") + SupervisorJob()) {
+
+    }
+
+    val job2 = launch(Dispatchers.IO) { }
+}
+
+private fun dispatcher() {
+    //自定义线程池为调度器实现。这样就会出现线程切换
+    Executors.newScheduledThreadPool(10).asCoroutineDispatcher()
+        .use { dispatcher ->
+            GlobalScope.launch(dispatcher) {
+
+            }
+        }
+    //但可以使用下面的方式避免线程切换
+    Executors.newSingleThreadExecutor().asCoroutineDispatcher()
+        .use { dispatcher ->
+            GlobalScope.launch(dispatcher) {
+            }
+        }
+    //更简单的API
+    GlobalScope.launch(newSingleThreadContext("Dispatcher")) {
+
+    }
+
+}
+
+private fun interceptor() {
+    GlobalScope.launch(LogInterceptor()) {
+        println("===  interceptor 1 === ")
+        delay(1000)
+        println("===  interceptor  2 === ")
+    }
+}
+
+
 private suspend fun loadUserFromServer(): String {
     var user = ""
     //with
@@ -120,4 +188,9 @@ private suspend fun loadUserFromServer(): String {
 
 fun main() {
     first()
+    println()
+    lazy()
+
+    println()
+    interceptor()
 }

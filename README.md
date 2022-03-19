@@ -1057,14 +1057,38 @@ import com.wj.kotlin.randomItemValuePrintln as r
 
 ### 4.协程上下文CoroutineContext
 
-* Job(协程唯一标识)：创建协程的返回值及协程的工作任务。
-* CoroutineDispatcher(调度器)：
-    - `Dispatchers.Default`：默认。线程池，适合处理后台计算。CPU密集型任务调度器。
-    - `Dispatchers.IO`：IO调度器。适合执行IO操作，IO密集型调度器。
-    - `Dispatchers.Main`：UI调度器。根据不同的平台初始化成对应的UI线程
-    - `Dispatchers.Unconfined`：不指定线程，如果子协程切换线程，接下来的代码也在该子线程中执行。
-* ContinuationInterceptor(拦截器)
-* CoroutineName(协程名称)
+* 可通过`launch(coroutineContext){}`，`async(coroutineContext){}`的方式为该协程设置`CoroutineContext`
+  。该`CoroutineContext`支持`+`。当需要分别设置下面的属性值时，可直接`+`。
+* [Job(协程唯一标识)]：创建协程的返回值及协程的工作任务。
+    - `Deferred<out T>`：调用await()挂起协程并返回一个带返回值的Job
+    - `SupervisorJob`：创建一个子协程隔离的Job
+* [CoroutineDispatcher(调度器)]：控制协程运行的线程。
+    - 提供的几种Dispatchers：
+        - `Dispatchers.Default`：默认。任意平台的线程池，适合处理后台计算。CPU密集型任务调度器。
+        - `Dispatchers.IO`：IO调度器。仅为JVM平台的线程池。适合执行IO操作，IO密集型调度器。
+        - `Dispatchers.Main`：UI调度器。根据不同的平台初始化成对应的UI线程
+        - `Dispatchers.Unconfined`：不指定线程。在遇到挂起函数之前是原线程，如果遇到挂起函数，接下来的代码也在该子线程中执行。
+    - 在调度器中还有一个 `immediate`属性。如果当前处于该调度器中，不执行调度器切换直接执行。 **[TODO 这个地方还要在理解一下！！！]**
+    - 自定义线程池为调度器解决任务分配问题：
+        - 若线程池可产生多个核心线程如`Executors.newScheduledThreadPool(10)`，那么此时线程池会有线程切换，造成资源浪费。
+        - 所以更推荐`Executors.newSingleThreadExecutor()`，那么此时仅有一个线程，就可以更好该线程运行协程，代码如下：
+        ``` 
+          Executors.newSingleThreadExecutor().asCoroutineDispatcher()
+            .use { dispatcher ->
+                 GlobalScope.launch(dispatcher) {
+            }
+          }
+        ```
+        - 当然kotlin提供了更方便的方式`newSingleThreadContext`和`newFixedThreadPoolContext`来创建一个线程池为调度器，如下：
+        ``` 
+          GlobalScope.launch(newSingleThreadContext("Dispatcher")) {
+
+          }
+        ```
+* [ContinuationInterceptor(拦截器)]：里面的key是单例的，当添加多个拦截器，只有一个生效的。 **[TODO 这个地方还要在理解一下！！！]**
+    - 拦截协程做一些附加操作。
+* [CoroutineName(协程名称)]
+    - 通过`CoroutineName("xxxx")`为`CoroutineContext`传入name
 
 ### 5.协程作用域
 
@@ -1107,7 +1131,23 @@ import com.wj.kotlin.randomItemValuePrintln as r
           ；`mainScope.launch{}`创建是[Android主线程作用域的协程]。
         - `async{ return@async  xxxx }`：返回`Job`的子类`Deferred`，可通过`await()`获取完成时的返回值。
     - 创建阻塞当前线程的协程
-        - `runBlocking {}`创建一个[阻塞的协程]。阻塞当前线程，知道里面的代码执行完毕。等价于`Thread.sleep`
+        - `runBlocking {}`创建一个[阻塞的协程]。等价于`Thread.sleep`
+          。阻塞当前线程，直到里面的代码及所有的子协程执行完毕才会退出。所以如果该阻塞协程里面有`LAZY`启动模式的协程，如果该协程没有`start`或者`cancel`
+          ，则该阻塞协程会一直存在。
+* [协程启动模式]：通过在`launch(start = CoroutineStart.LAZY) {}`来设置启动模式。
+    - `DEFAULT`：立即等待调度执行，父协程里的任务执行完，接着执行子协程的任务。默认值
+    - `ATOMIC`：立即等待被调度执行，与`DEFAULT`类似。区别在开始前无法取消，肯定会执行`launch{}`里的内容及子协程里面的内容，直到执行完毕或遇到第一个挂起函数。
+    - `LAZY`：需要主动触发才能进入等待调度阶段，否则永远不会执行。
+        - 调用`Job.start`:主动触发协程的调度执行，只是让该协程进入到等待阶段，会等着当前协程执行完才会执行该job协程；
+        - 调用`Job.join`:隐式触发协程的调度执行，并且会阻塞当前协程，让job协程执行完，在执行当前协程。
+        - 该启动模式下的协程，如果里面有`runBlocking {}`阻塞协程，那么如果该协程一直不执行`start`或者`cancel`，那里面的阻塞协程永远不会退出。
+    - `UNDISPATCHED`：该协程会立即被执行，不会等父协程执行完在执行，直到遇到第一个挂起函数，才会调度都指定调度器所在的线程上执行。相比较于其他模式，少了等待。
+* [协程调度器] 通过`launch(Dispatchers.IO) { }`传入调度器。这里设置的就是`CoroutineContext`的内容，该 `CoroutineContext`支持`+`
+  来设置里面的四个元素。具体的值可见**4.协程上下文CoroutineContext**
+* [切换代码所运行的线程]
+    - (1)通过`withContext`切换代码所运行的线程，直到结束返回结果。 不会创建新的协程。
+    - (2)`launch{}`、`async{}`、`runBlocking {}`切换线程，但是要创建新的协程。
+    - 多个`withContext`是串行执行的，适合一个任务依赖于上一个任务返回的结果。`async{}和await()`同样可以实现相同的效果，但是需要创建新的协程。
 
 ### 7.协程取消
 
@@ -1125,14 +1165,32 @@ import com.wj.kotlin.randomItemValuePrintln as r
         - 同一作用域中，会取消它的所有子协程。但不会影响到其余兄弟协程。当该作用域已经取消之后，则不能再次启动新的协程。
         - 子线程会通过抛出`CancellationException`异常而被取消，父协程是不需要任何额外操作。默认的会创建一个`CancellationException`
           ，也可以新建传入。
-        - 执行取消操作之后，不会立即停止，进入到取消中，只有任务完成才会变成已取消。所以在协程中要定期检查协程是否处于`isActive`
+        - 执行取消操作之后，不会立即停止，进入到取消中，只有任务完成才会变成已取消。所以在协程中要：
+            - 定期检查协程是否处于`isActive`
+            - 或者可以`ensureActive()`来检查该协程是不是处于不活跃状态立即抛出异常，可以防在循环体的第一行。
+            - 或者可以`yield()`来检查协程是不是完成，已完成则抛出`CancellationException`异常来退出协程。
+        - 协程取消后会抛出`CancellationException`
+          ，可以try/catch捕获异常，在finally完成资源释放等清理工作。但是处于取消中的协程是不能挂起，如果在finally涉及挂起，后续代码是无法执行。可通过`withContext(NonCancellable)`
+          来创建一个无法取消的任务，以保证清理任务完成。
     - `join()`：阻塞当前线程直到协程执行完毕
     - `cancelAndJoin()`：取消并等待协程完成
     - `cancelChildren()`：取消所有的子协程
     - `attachChild(child:ChildJob)`：附加一个子协程到当前协程上
-* 对于Completing或Cancelling，会等着所有的子协程完成后，才会进入已完成或已取消状态
+* 对于Completing或Cancelling，会等着所有的子协程完成后，才会进入已完成或已取消状态。
 
-### 8.协程的挂起
+### 8.异常处理
+
+* try-catch直接捕获作用域内的异常，但是只能处理[子作用域]的协程。不能处理`launch{}`和`async{}`作用域。
+* 可通过`val handler = CoroutineExceptionHandler { coroutineContext, throwable ->  }`来获取[全局异常]
+  ，如果存在子父级关系的作用域，那么异常会依次抛出多次。
+    - 只支持`launch{}`，`async{}`无效。
+    - 全局异常处理并不能阻止协程取消，只是避免异常而退出程序
+* [异常传播]：(1)如果父协程发生异常，所有的子协程都会取消；(2)子协程发生异常，会导致父协程取消，间接导致兄弟协程也取消。
+* 针对[异常传播]的第二种情况子协程发生异常，避免影响到兄弟协程和父协程的方案：
+    - 通过`supervisorScope {}`来创建子作用域
+    - 通过`launch(CoroutineName("123") + SupervisorJob()) {}`创建协程
+
+### 9.协程的挂起
 
 * 通过对函数前添加`suspend`修饰符仅是提醒该函数需要挂起，需要在协程中执行该函数，里面要配合`withContext()`来实现一个挂起函数。
 * 该挂起函数可以自动的切换线程，并且可以自动的挂起和恢复。
