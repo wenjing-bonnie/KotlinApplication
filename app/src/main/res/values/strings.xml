@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">KotlinApplication</string>
+    <string name="title_activity_first_compose">FirstComposeActivity</string>
 </resources>
