@@ -55,7 +55,7 @@
 * apply：持有this。返回的是对象本身，可链式调用。
     - 应用场景：对象实例化赋值。例如`View.inflater`的view绑定数据；多层级判空问题。
 * also：持有it。返回的是对象本身。可链式调用。
-    - 应用场景：同let。`while (reader.readLine().apply { line = this } != null) `
+    - 应用场景：同let。`while (reader.readLine().also { line = this } != null) `
       代替java的`while ( (line=reader.readLine())!=null )`
 * with():不是扩展函数，而是内联函数。对象需要传入，在函数体内持有this，可直接调用传入的对象的成员变量和成员方法。
     - 应用场景：多次调用同一对象的不同方法。可以省去对象名的调用，直接在`{}`内调用对象中的方法即可。
