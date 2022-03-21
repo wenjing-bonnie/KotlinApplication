@@ -3,50 +3,68 @@ package com.wj.kotlin.ui
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.ClickableText
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
+import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.material.TextField
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.drawscope.*
 import androidx.compose.ui.layout.MeasurePolicy
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.*
+import androidx.compose.ui.text.ParagraphStyle
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.*
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.text.buildSpannedString
 import com.wj.kotlin.R
-import com.wj.kotlin.ui.ui.theme.KotlinApplicationTheme
+import kotlin.properties.Delegates
+import kotlin.reflect.KProperty
 
 class FirstComposeActivity : ComponentActivity() {
+
+    val id: Int by Delegates.notNull<Int>()
+//    val day: Int by Delegates.observable(0,
+//        { property: KProperty<*>, oldValue: Int, newValue: Int ->
+//            println()
+//        })
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         //对ComponentActivity的扩展函数
         setContent {
-            BoxLayout()
-            Spacer(
-                modifier = Modifier
-                    .background(Color.Gray)
-                    .padding(10.dp)
-                    .fillMaxWidth()
-            )
-            clickableText()
+//            BoxLayout()
+//            Spacer(
+//                modifier = Modifier
+//                    .background(Color.Gray)
+//                    .padding(10.dp)
+//                    .fillMaxWidth()
+//            )
+//            clickableText()
+
+            Textfield()
         }
     }
 }
@@ -224,25 +242,99 @@ fun clickableText() {
 
     ClickableText(text = annotatedText, onClick = { offset ->
         println("clickable is ${offset}")
+        // url返回的是[Range(item=https://baidu.com, start=5, end=9, tag=URL)]
         val url = annotatedText.getStringAnnotations(tag = "URL", start = offset, end = offset)
+        println("url ${url}")
+        //通过这种方式取出
         url?.let {
-            println(it.first())
+            println(it.firstOrNull()?.let {
+                println("${it.item}, ${it.start},${it.end}, ${it.tag}")
+            })
         }
-
     })
 }
 
-@Preview
+@Composable
+fun Textfield() {
+    /**
+     * 将本地状态存储到内存中，并且传递给mutableStateOf的值的变化
+     * 会在状态发生任何变化的时候自动更新界面。
+     */
+    var text by remember { mutableStateOf("Hello") }
+    OutlinedTextField(
+        value = text,
+        onValueChange = {
+            text = it
+            println("${it}")
+        },
+        label = { Text("title") },
+        placeholder = { Text("hint") },
+        leadingIcon = { GreetingImage() },
+        //trailingIcon = { BoxLayout()}
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Text,
+            autoCorrect = true,
+            capitalization = KeyboardCapitalization.Words,
+            imeAction = ImeAction.Search
+        ),
+        visualTransformation = PasswordVisualTransformation('*')
+    )
+    var text1 by remember {
+        mutableStateOf("Hello\nWorld")
+    }
+    BasicTextField(value = text1, onValueChange = {})
+}
+
+@Composable
+fun Line() {
+
+    Canvas(
+        modifier = Modifier
+            .fillMaxWidth()
+            .fillMaxHeight(0.5f)
+            .background(color = Color.Red, RectangleShape)
+    ) {
+        // inset(20.0f, 0.0f) {
+        drawCircle(
+            color = Color.Blue,
+            radius = size.height / 2,
+            center = Offset(size.height / 2, size.height / 2)
+        )
+        //}
+        withTransform({
+           // translate(0.0f, 0.0f)
+           // rotate(degrees = 90f)
+            scale(0.5f,0.5f)
+        }) {
+            drawRect(
+                color = Color.Yellow,
+                topLeft = Offset(size.height, 0.0f),
+                size = Size(size.height * 2, size.height)
+            )
+        }
+
+       // rotate(degrees = 20.0f) {
+            drawLine(
+                start = Offset(size.height * 3, size.height / 2),
+                end = Offset(size.width, size.height / 2),
+                color = Color.Blue,
+                strokeWidth = 20.0f
+            )
+      //  }
+    }
+}
+
+@Preview(backgroundColor = 123444, showBackground = true)
 @Composable
 fun DefaultPreview() {
     Column {
-        HelloList()
-        Spacer(
-            modifier = Modifier
-                .background(Color.Gray)
-                .padding(10.dp)
-                .fillMaxWidth()
-        )
+//        HelloList()
+//        Spacer(
+//            modifier = Modifier
+//                .background(Color.Gray)
+//                .padding(10.dp)
+//                .fillMaxWidth()
+//        )
         Column()
         Spacer(
             modifier = Modifier
@@ -265,6 +357,21 @@ fun DefaultPreview() {
                 .fillMaxWidth()
         )
         clickableText()
+        Spacer(
+            modifier = Modifier
+                .background(Color.Gray)
+                .padding(10.dp)
+                .fillMaxWidth()
+        )
+        Textfield()
+        Spacer(
+            modifier = Modifier
+                .background(Color.Gray)
+                .padding(10.dp)
+                .fillMaxWidth()
+        )
+        Line()
+
     }
 
 }

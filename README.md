@@ -352,6 +352,15 @@ fun main() {
 
 * kotlin直接支持委托模式。通过 `by`实现委托。
 * 类委托：一个类定义的方法实际是调用另一个类对象的方法来实现。
+* 属性委托：一个类的属性值不是在类中直接进行定义，而是委托给一个代理类，从而实现对类的属性统一管理。
+    - 表达式： val/var 属性名:类型 by 表达式
+    - 属性委托不必实现任何接口，但必须提供getValue()/setValue()函数。
+* 标准委托：
+    - lazy
+    - NotNull：适用于那些无法在初始化阶段就确定属性值的，那么属性在访问前就会抛出异常。例如` val id:Int by Delegates.notNull<Int>()`
+      。本质就是属性委托。
+    - Delegates.observable：可以实现观察者模式，每次改变都会回调。
+    - Delegates.vetoable：同observable都是观察属性值的变化，不同的是vetoable可以通过处理函数来决定属性值是否生效。
 
 ## 二、函数类型
 

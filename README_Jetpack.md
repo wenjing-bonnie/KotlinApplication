@@ -103,8 +103,64 @@ MVVM+Jetpack Google标准化Jetpack架构模式 未来的趋势
         println("clickable is ${offset}")
     })
 ```
-* 
 
+* pushStringAnnotation()来创建一个Text。点击Text的时候，需要附加额外信息。例如特定字词下面附加浏览器链接地址。需要此时下面三个参数：
+    - 一个标记(String)
+    - 一个项(String)
+    - 一个文字范围
+    ``` 
+      val annotatedText = buildAnnotatedString {
+        append("Click")
+        pushStringAnnotation(tag = "URL", annotation = "https://baidu.com")
+        withStyle(style = SpanStyle(color = Color.Blue)) {
+            // 要添加额外信息的文字
+            append("here")
+        }
+        //将"URL"注释附加到下面的内容直到调用pop()
+        pop()
+        }
+    //可通过下面的方式读取相应的信息
+      ClickableText(text = annotatedText, onClick = { offset ->
+        println("clickable is ${offset}")
+        // url返回的是[Range(item=https://baidu.com, start=5, end=9, tag=URL)]
+        val url = annotatedText.getStringAnnotations(tag = "URL", start = offset, end = offset)
+        println("url ${url}")
+        //通过这种方式取出
+        url?.let {
+            println(it.firstOrNull()?.let {
+                println("${it.item}, ${it.start},${it.end}, ${it.tag}")
+            })
+        }
+    })
+    ```
+* 输入和修改文字
+    - TextField：默认的是填充样式。OutlinedTextField：轮廓样式
+    - BasicTextField：允许用户通过硬件或者软件键盘编辑我脑子，但没有提供提示或占位符等装饰。
+    - 若是设计中调用是Material TextField或OutlineTextField，建议使用TextField。无需Material规范，直接使用BasicTextField
+    - 设置键盘的类型：keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+    ```  
+            keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Text,
+            autoCorrect = true,
+            capitalization = KeyboardCapitalization.Words,
+            imeAction = ImeAction.Search)
+    ```
+    - 通过visualTransformation = PasswordVisualTransformation('*')来将输入的内容转换成特殊字符。
+
+*
+
+### 5.Compose之状态管理
+
+* mutableStateOf()：使得变量有了被观察的才能，当值发生改变的时候就会告诉运用该变量
+
+### 6.图形
+
+* 需要知道哪些配置项是在Paint中设置，哪些是在方法调用设置
+* Canvas：精确控制元素的样式和位置来绘制元素。通过`Canvas() {}`来创建画布，然后通过drawLine/drawRect/drawCircle来创建图形。
+* 每个`Canvas() {}`提供`DrawScope`(限定了作用域的绘图环境)
+    - 可通过`DrawScope.insert()`来调整作用域的默认参数，以改变绘图的边界。
+    - 通过` rotate(degrees = 20.0f) {}`对图形进行旋转
+    - 若要对绘图执行多个转换，不能创建嵌套的`DrawScope`进行操作，而是使用`withTransform({ 增加多次变换逻辑 }){ }`
 
 
 * @Compose：用来标记构建View的方法
