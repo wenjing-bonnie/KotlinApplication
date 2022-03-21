@@ -9,6 +9,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
@@ -139,19 +140,36 @@ fun Column() {
 
 @Composable
 fun HelloList(messages: List<String>) {
-    LazyColumn(content = {
-        item { Item() }
-        item { Item() }
-        item { Item() }
-        items(messages) {
-            Message(msg = it)
-        }
-    })
+//    LazyColumn(
+//        content = {
+//            item { Item() }
+//            item { Item() }
+//            item { Item() }
+//            items(messages) {
+//                Message(msg = it)
+//            }
+//        },
+//        contentPadding = PaddingValues(50.dp, 50.dp),
+//        verticalArrangement = Arrangement.spacedBy(50.0.dp)
+//    )
+
+    LazyRow(
+        content = { items(4) { Text(text = "${it},123") } },
+        horizontalArrangement = Arrangement.SpaceEvenly,
+        modifier = Modifier.fillMaxWidth()
+    )
 }
 
 @Composable
 fun Message(msg: String) {
-    Text(text = msg, fontSize = 30.sp, color = Color.Red)
+    Text(
+        text = msg,
+        fontSize = 30.sp,
+        color = Color.Red,
+        modifier = Modifier
+            .background(Color.Yellow)
+            .fillMaxWidth()
+    )
 }
 
 fun onClick() {

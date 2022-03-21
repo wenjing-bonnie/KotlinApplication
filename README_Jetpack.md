@@ -180,7 +180,9 @@
 * LazyColumn和LazyRow
 * 不接受@Composable内容块参数，而是提供一个`LazyListScope.()`块。即在`LazyColumn(content = {item {这里可接收@Composable}})`
   。通过`item{}`来添加单个列表项。通过`item(Int){}`用于添加多个列表项。
-*
+* 其中参数contentPadding：设置的是整个列表的padding，相当于设置之前对ListView这个控件设置padding
+* LazyColumn其中参数`verticalArrangement = Arrangement.spacedBy()`
+  ：设置的每个item之间的垂直方向的间距。那么对于LazyRow其中的参数就是`horizontalArrangement = Arrangement.SpaceEvenly`在水平方向的间距
 
 * @Composable：用来标记构建View的方法
 
