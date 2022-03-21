@@ -9,6 +9,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.ClickableText
@@ -137,12 +138,20 @@ fun Column() {
 }
 
 @Composable
-fun HelloList() {
+fun HelloList(messages: List<String>) {
     LazyColumn(content = {
         item { Item() }
         item { Item() }
         item { Item() }
+        items(messages) {
+            Message(msg = it)
+        }
     })
+}
+
+@Composable
+fun Message(msg: String) {
+    Text(text = msg, fontSize = 30.sp, color = Color.Red)
 }
 
 fun onClick() {
@@ -302,9 +311,9 @@ fun Line() {
         )
         //}
         withTransform({
-           // translate(0.0f, 0.0f)
-           // rotate(degrees = 90f)
-            scale(0.5f,0.5f)
+            // translate(0.0f, 0.0f)
+            // rotate(degrees = 90f)
+            scale(0.5f, 0.5f)
         }) {
             drawRect(
                 color = Color.Yellow,
@@ -313,14 +322,14 @@ fun Line() {
             )
         }
 
-       // rotate(degrees = 20.0f) {
-            drawLine(
-                start = Offset(size.height * 3, size.height / 2),
-                end = Offset(size.width, size.height / 2),
-                color = Color.Blue,
-                strokeWidth = 20.0f
-            )
-      //  }
+        // rotate(degrees = 20.0f) {
+        drawLine(
+            start = Offset(size.height * 3, size.height / 2),
+            end = Offset(size.width, size.height / 2),
+            color = Color.Blue,
+            strokeWidth = 20.0f
+        )
+        //  }
     }
 }
 
@@ -328,13 +337,13 @@ fun Line() {
 @Composable
 fun DefaultPreview() {
     Column {
-//        HelloList()
-//        Spacer(
-//            modifier = Modifier
-//                .background(Color.Gray)
-//                .padding(10.dp)
-//                .fillMaxWidth()
-//        )
+        HelloList(mutableListOf("1241324", "234324"))
+        Spacer(
+            modifier = Modifier
+                .background(Color.Gray)
+                .padding(10.dp)
+                .fillMaxWidth()
+        )
         Column()
         Spacer(
             modifier = Modifier

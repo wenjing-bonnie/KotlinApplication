@@ -1,6 +1,7 @@
 # Jetpack
 
-MVVM+Jetpack Google标准化Jetpack架构模式 未来的趋势
+* MVVM+Jetpack Google标准化Jetpack架构模式 未来的趋势
+* Jetpack框架中的常用组件有： Lifecycle ViewModel LiveData Paging Room Navigation WorkManager 七个组件。
 
 ## 一、Compose 声明式UI
 
@@ -149,11 +150,11 @@ MVVM+Jetpack Google标准化Jetpack架构模式 未来的趋势
 
 *
 
-### 5.Compose之状态管理
+### 5.Compose之状态管理 [TODO 这个地方还没有搞清楚]
 
 * mutableStateOf()：使得变量有了被观察的才能，当值发生改变的时候就会告诉运用该变量
 
-### 6.图形
+### 6.图形Canvas
 
 * 需要知道哪些配置项是在Paint中设置，哪些是在方法调用设置
 * Canvas：精确控制元素的样式和位置来绘制元素。通过`Canvas() {}`来创建画布，然后通过drawLine/drawRect/drawCircle来创建图形。
@@ -162,9 +163,9 @@ MVVM+Jetpack Google标准化Jetpack架构模式 未来的趋势
     - 通过` rotate(degrees = 20.0f) {}`对图形进行旋转
     - 若要对绘图执行多个转换，不能创建嵌套的`DrawScope`进行操作，而是使用`withTransform({ 增加多次变换逻辑 }){ }`
 
+### 7. @Preview：
 
-* @Compose：用来标记构建View的方法
-* @Preview：在不运行APP的情况下确认布局。常见参数有：
+* 在不运行APP的情况下确认布局。常见参数有：
     - name:String：该名字会显示在预览布局中。
     - showBackground:Boolean：是否显示背景。
     - backgroundColor:Long：设置背景颜色。
@@ -173,6 +174,15 @@ MVVM+Jetpack Google标准化Jetpack架构模式 未来的趋势
     - fontScale:Float：对预览字体放大，范围从0.01
     - widthDp:Int：最大宽度，单位dp
     - heightDp:Int：最大高度，单位dp
+
+### 8.延迟可组合项
+
+* LazyColumn和LazyRow
+* 不接受@Composable内容块参数，而是提供一个`LazyListScope.()`块。即在`LazyColumn(content = {item {这里可接收@Composable}})`
+  。通过`item{}`来添加单个列表项。通过`item(Int){}`用于添加多个列表项。
+*
+
+* @Composable：用来标记构建View的方法
 
 ## 一、
 
