@@ -3,7 +3,32 @@
 * MVVM+Jetpack Google标准化Jetpack架构模式 未来的趋势
 * Jetpack框架中的常用组件有： Lifecycle ViewModel LiveData Paging Room Navigation WorkManager 七个组件。
 
-## 一、Compose 声明式UI
+## 一、Compose基础
+
+### 1.编程思想
+
+* 可组合函数：就是构建界面的函数，也就是被@Composable标记的函数。 可组合函数可以调用其他的可组合函数来发出界面层次结构。
+* 可组合函数不需要返回任何内容。仅仅是描述的是屏幕的状态，而不是构造界面的微件。
+* 一个被@Composable标记的被称为一个微件。
+* 在命令式界面模式中，如需更改某个微件，可以调用setter已更改其内部状态。 而在Compose，微件无setter/getter。可以调用带有不同参数的同一可组合函数来更新界面。
+* 可组合项负责在每次可观察数据更新时，将当前应用状态转换为界面。可以使用新数据再次调用可组合函数，导致重新绘制界面元素，称为重组。
+* 可组合函数可以接收动态数据来更新 。
+ 
+ 
+  这样就会导致函数进行重组（系统会根据需要使用新数据重新绘制函数发出的微件）。 Compose框架可以智能的仅重组已更改的组件。
+
+### 1.生命周期慨览
+
+### 2.管理状态
+
+* Android应用都会向用户显示状态。下面就是一些状态实例：
+    - 无法建立网络显示的信息提示控件
+    - 博文和相关评论
+    - 用户点击按钮时播放的波纹动画
+    - 用户可以在图片上贴贴纸
+* Compose是声明式工具集，
+
+## 二、Compose 声明式UI的设计
 
 ### 1。
 
@@ -11,6 +36,7 @@
 * Compose UI组合方式。代替之前View ViewGroup 继承关系
 * 自动更新策略
 * 只会进行一次测量，替换之前的多次测量
+* @Composable：用来标记构建View的方法。称为一个微件
 
 ### 2.Column/Row/Box
 
@@ -183,8 +209,22 @@
 * 其中参数contentPadding：设置的是整个列表的padding，相当于设置之前对ListView这个控件设置padding
 * LazyColumn其中参数`verticalArrangement = Arrangement.spacedBy()`
   ：设置的每个item之间的垂直方向的间距。那么对于LazyRow其中的参数就是`horizontalArrangement = Arrangement.SpaceEvenly`在水平方向的间距
+* `LazyVerticalGrid(cells = GridCells.Adaptive(minSize = 50.dp)) {}`创建网格式UI。
+    - `GridCells.Adaptive()`要求每列至少给定值的宽度。
+    - `GridCells.Fixed()`固定列数
 
-* @Composable：用来标记构建View的方法
+## 二、主题
+
+### 1.主题分类
+
+* Material主题设置：
+* 自定义设计系统
+* 主题详解
+
+### 2. MaterialTheme
+
+* 由颜色、排版和形状属性组成。
+*
 
 ## 一、
 

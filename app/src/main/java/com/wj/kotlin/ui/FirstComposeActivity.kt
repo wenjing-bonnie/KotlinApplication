@@ -3,23 +3,19 @@ package com.wj.kotlin.ui
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.GridCells
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.ClickableText
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
-import androidx.compose.material.TextField
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,7 +39,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.wj.kotlin.R
 import kotlin.properties.Delegates
-import kotlin.reflect.KProperty
 
 class FirstComposeActivity : ComponentActivity() {
 
@@ -57,16 +52,7 @@ class FirstComposeActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         //对ComponentActivity的扩展函数
         setContent {
-//            BoxLayout()
-//            Spacer(
-//                modifier = Modifier
-//                    .background(Color.Gray)
-//                    .padding(10.dp)
-//                    .fillMaxWidth()
-//            )
-//            clickableText()
-
-            Textfield()
+            TextFieldComposable()
         }
     }
 }
@@ -138,26 +124,38 @@ fun Column() {
     }
 }
 
-@Composable
-fun HelloList(messages: List<String>) {
-//    LazyColumn(
-//        content = {
-//            item { Item() }
-//            item { Item() }
-//            item { Item() }
-//            items(messages) {
-//                Message(msg = it)
-//            }
-//        },
-//        contentPadding = PaddingValues(50.dp, 50.dp),
-//        verticalArrangement = Arrangement.spacedBy(50.0.dp)
-//    )
 
-    LazyRow(
-        content = { items(4) { Text(text = "${it},123") } },
-        horizontalArrangement = Arrangement.SpaceEvenly,
-        modifier = Modifier.fillMaxWidth()
+@ExperimentalFoundationApi
+@Composable
+fun LazyColumnComposable(messages: List<String>) {
+    LazyColumn(
+        content = {
+            items(3) { Item() }
+            stickyHeader {
+                Text("header", color = Color.Yellow)
+            }
+            items(messages) {
+                Message(msg = it)
+            }
+        },
+        contentPadding = PaddingValues(50.dp, 50.dp),
+        verticalArrangement = Arrangement.spacedBy(50.0.dp)
     )
+
+//    LazyVerticalGrid(cells = GridCells.Fixed(3)) {
+//        items(mutableListOf("a", "b", "c")) {
+//            Image(
+//                painter = painterResource(id = R.drawable.ic_launcher123),
+//                contentDescription = "12"
+//            )
+//        }
+//    }
+
+//    LazyRow({}
+//        content = { items(4) { Text(text = "${it},123") } },
+//        horizontalArrangement = Arrangement.SpaceEvenly,
+//        modifier = Modifier.fillMaxWidth()
+//    )
 }
 
 @Composable
@@ -229,7 +227,7 @@ fun ParentLayout(modifier: Modifier, content: @Composable () -> Unit) {
 }
 
 @Composable
-fun text() {
+fun TextComposable() {
     SelectionContainer {
         Text(
             buildAnnotatedString {
@@ -282,7 +280,7 @@ fun clickableText() {
 }
 
 @Composable
-fun Textfield() {
+fun TextFieldComposable() {
     /**
      * 将本地状态存储到内存中，并且传递给mutableStateOf的值的变化
      * 会在状态发生任何变化的时候自动更新界面。
@@ -313,7 +311,7 @@ fun Textfield() {
 }
 
 @Composable
-fun Line() {
+fun CanvasComposable() {
 
     Canvas(
         modifier = Modifier
@@ -351,11 +349,12 @@ fun Line() {
     }
 }
 
-@Preview(backgroundColor = 123444, showBackground = true)
+@OptIn(ExperimentalFoundationApi::class)
+@Preview(backgroundColor = 0xffffff, showBackground = true)
 @Composable
 fun DefaultPreview() {
     Column {
-        HelloList(mutableListOf("1241324", "234324"))
+        LazyColumnComposable(mutableListOf("1241324", "234324"))
         Spacer(
             modifier = Modifier
                 .background(Color.Gray)
@@ -376,7 +375,7 @@ fun DefaultPreview() {
                 .padding(10.dp)
                 .fillMaxWidth()
         )
-        text()
+        TextComposable()
         Spacer(
             modifier = Modifier
                 .background(Color.Gray)
@@ -390,14 +389,14 @@ fun DefaultPreview() {
                 .padding(10.dp)
                 .fillMaxWidth()
         )
-        Textfield()
+        TextFieldComposable()
         Spacer(
             modifier = Modifier
                 .background(Color.Gray)
                 .padding(10.dp)
                 .fillMaxWidth()
         )
-        Line()
+        CanvasComposable()
 
     }
 
