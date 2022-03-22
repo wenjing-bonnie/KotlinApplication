@@ -5,9 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.GridCells
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
@@ -17,6 +15,9 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.listSaver
+import androidx.compose.runtime.saveable.mapSaver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -52,7 +53,8 @@ class FirstComposeActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         //对ComponentActivity的扩展函数
         setContent {
-            TextFieldComposable()
+            //TextFieldComposable()
+            MutableStateComposable()
         }
     }
 }
@@ -349,12 +351,69 @@ fun CanvasComposable() {
     }
 }
 
+data class City(val name: String, val country: String)
+
+val CitySaver = run {
+    val nameKey = "Name"
+    val countryKey = "Country"
+    mapSaver(
+        //保存的时候按照map分别进行保存每个字段
+        save = { mapOf(nameKey to it.name, countryKey to it.country) },
+        //使用的时候，将map中的值取出来，然后赋值给对象的参数
+        restore = { City(it[nameKey] as String, it[countryKey] as String) })
+}
+
+val CityListSaver = listSaver<City, Any>(
+    save = { listOf(it.name, it.country) },
+    restore = { City(it[0] as String, it[1] as String) }
+)
+
+@Composable
+fun MutableStateComposable() {
+    var name = "张三"
+    var mutableName by remember {
+        mutableStateOf("123")
+    }
+    println(mutableName)
+
+    val mutableName1 = remember {
+        mutableStateOf(name)
+    }
+
+    val (mutableName2, setValue) = remember {
+        mutableStateOf(name)
+    }
+
+    val selectedCity by rememberSaveable(stateSaver = CitySaver) {
+        mutableStateOf(City("北京", "China"))
+    }
+
+    val selectedCity1 by rememberSaveable(stateSaver = CityListSaver) {
+        mutableStateOf(City("北京", "China"))
+    }
+
+    println(selectedCity)
+    println(selectedCity1)
+
+
+
+
+
+
+
+    println(mutableName2::class.javaObjectType)
+    println(setValue)
+    OutlinedTextField(value = "", onValueChange = {
+        mutableName = it
+    }, label = { Text(mutableName) })
+}
+
 @OptIn(ExperimentalFoundationApi::class)
 @Preview(backgroundColor = 0xffffff, showBackground = true)
 @Composable
 fun DefaultPreview() {
     Column {
-        LazyColumnComposable(mutableListOf("1241324", "234324"))
+        //LazyColumnComposable(mutableListOf("1241324", "234324"))
         Spacer(
             modifier = Modifier
                 .background(Color.Gray)
@@ -369,20 +428,20 @@ fun DefaultPreview() {
                 .fillMaxWidth()
         )
         BoxLayout()
-        Spacer(
-            modifier = Modifier
-                .background(Color.Gray)
-                .padding(10.dp)
-                .fillMaxWidth()
-        )
-        TextComposable()
-        Spacer(
-            modifier = Modifier
-                .background(Color.Gray)
-                .padding(10.dp)
-                .fillMaxWidth()
-        )
-        clickableText()
+//        Spacer(
+//            modifier = Modifier
+//                .background(Color.Gray)
+//                .padding(10.dp)
+//                .fillMaxWidth()
+//        )
+//        TextComposable()
+//        Spacer(
+//            modifier = Modifier
+//                .background(Color.Gray)
+//                .padding(10.dp)
+//                .fillMaxWidth()
+//        )
+//        clickableText()
         Spacer(
             modifier = Modifier
                 .background(Color.Gray)
@@ -397,6 +456,13 @@ fun DefaultPreview() {
                 .fillMaxWidth()
         )
         CanvasComposable()
+        Spacer(
+            modifier = Modifier
+                .background(Color.Gray)
+                .padding(10.dp)
+                .fillMaxWidth()
+        )
+        MutableStateComposable()
 
     }
 
