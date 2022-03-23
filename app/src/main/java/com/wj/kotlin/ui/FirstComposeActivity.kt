@@ -1,5 +1,6 @@
 package com.wj.kotlin.ui
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -12,6 +13,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.material.Button
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
@@ -26,6 +28,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.drawscope.*
 import androidx.compose.ui.layout.MeasurePolicy
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.SpanStyle
@@ -38,7 +41,9 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.compose.rememberNavController
 import com.wj.kotlin.R
+import com.wj.kotlin.mvvm.FirstMvvmActivity
 import kotlin.properties.Delegates
 
 class FirstComposeActivity : ComponentActivity() {
@@ -54,9 +59,28 @@ class FirstComposeActivity : ComponentActivity() {
         //对ComponentActivity的扩展函数
         setContent {
             //TextFieldComposable()
-            MutableStateComposable()
+            //MutableStateComposable()
+            NavigatorComposable()
         }
     }
+}
+
+//val context = LocalContext.current
+@Composable
+fun NavigatorComposable() {
+    Button(onClick = {
+        println("onClick")
+        // val nav = rememberNavController()
+    } ) {
+        Text(text = "暂时先这样处理")
+    }
+}
+
+@Composable
+fun NavigatorClickComposable() {
+    println(" onClick ")
+    val navController = rememberNavController()
+
 }
 
 @Composable //代表式Compose的微件

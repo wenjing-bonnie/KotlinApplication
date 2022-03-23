@@ -5,6 +5,7 @@ pluginManagement {
         mavenCentral()
     }
 }
+//Google Maven 代码库
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {

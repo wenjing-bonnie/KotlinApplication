@@ -380,6 +380,13 @@
     - `GridCells.Adaptive()`要求每列至少给定值的宽度。
     - `GridCells.Fixed()`固定列数
 
+### 9.页面跳转
+
+* 在一个ComposeActivity中的方法都必须添加@Composable。
+  所以在ComposeActivity不推荐使用startActivity的方式进行跳转。（其中可以通过`LocalContext.current`
+  来得到Context）
+* 通过Navigation 导航库跳转页面，切换页面时可以做到基于View级别
+
 ## 二、主题
 
 ### 1.主题分类
@@ -407,5 +414,5 @@
 * DataBinding：数据绑定。数据发生变化，布局文件内容会及时更新。
     - 布局文件要交给DataBinding来管理。
     - 需要在build.gradle中设置dataBinding{ enable = true }
-    - 在布局文件中添加<layout >
+    - 在布局文件中添加<layout>
 * 在Activity中负责绑定
