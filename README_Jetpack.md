@@ -103,13 +103,29 @@
     - 视图绑定不支持布局变量或布局表达式，因此不能直接在XML中声明动态布局
     - 不支持双向数据绑定。
 
+### 2. LiveData - [可观察的数据存储类]
+
+* 在Compose中接触过通过`remember`+`mutableStateOf`可以创建一个可观察的对象。
+* 与其他可观察类不同的是：LiveData具有生命感知能力，可遵循其他组件(Activity、Fragment或Service)的生命周期。
+* 这种感知能力可确保LiveData仅更新处于活跃状态的应用组件观察者。
+* 如果观察者(Observer)的生命周期处于Started或Resumed，则LiveData会认为该观察者处于活跃状态。
+* LiveData只会将更新通知活跃的观察者。非活跃观察者不会收到通知。
+* 注册与实现了LifecycleOwner接口的对象配对的观察者。当相应的Lifecycle对象变为Destoried时，就可移除该观察者。
+* Activity/Fragment可以放心观察LiveData对象，而不担心泄漏（在Activity）/Fragment的生命周期被销毁时，系统会立刻退订它们）。
+* [优势] 
+
 ### 3.ViewModel - [为页面准备数据]
 
+* [解决问题 1] 页面销毁或重新创建界面控制器，则存储在其中的任何瞬态界面相关数据都会丢失，
+  例如在某个Activity中有一个列表，为配置更改后重新创建Activity后，新Activity必须重新拉取数据。 对于简单的数据，可以通过`onSaveInstanceState()`
+  从`onCreate()`中的bundle中恢复数据，但仅适合可以序列化的少量数据。 不适合可能比较大的数据，例如用户列表或位图。
+* [解决问题 2]   页面的一些异步调用，需要在页面销毁后清理这些调用避免内存泄漏，引起大量维护工作，并且在为配置更改重新创建对象的情况下，会造成资源浪费。
+* 将视图的数据分离。
 * 注重生命周期的方式存储和管理界面相关的数据。可以让数据在发生屏幕旋转等配置更改后继续留存。（那是不是就有一个释放的问题？？？）
 * 为界面准备数据。在配置更改期间自动保留ViewModel对象，以便它们存储的数据立即可提供给下一个Activity/Fragment实例使用。
 * [生命周期] ViewModel对象存在的范围是：获取`ViewModel`时传给了`ViewModelProvider`的`Lifecycle`。
   `ViewModel`将一直留在内存中，直到限定其存在时间范围的`Lifecycle`永久消失；Activity是activity完成时，对于Fragment是Fragment分离时。
-* ViewModel确保数据在社保配置更改后仍然存在。Room在数据库发生更改时通知LiveData  
+* ViewModel确保数据在社保配置更改后仍然存在。Room在数据库发生更改时通知LiveData
 
 ### 1.Lifecycle
 

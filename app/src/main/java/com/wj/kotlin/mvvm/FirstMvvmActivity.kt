@@ -3,6 +3,7 @@ package com.wj.kotlin.mvvm
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.LayoutInflater
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.wj.kotlin.R
 import com.wj.kotlin.databinding.ActivityFirstMvvmBinding
@@ -10,6 +11,7 @@ import com.wj.kotlin.databinding.ActivityFirstMvvmBinding
 class FirstMvvmActivity : AppCompatActivity() {
     lateinit var viewModel: FirstMvvmViewModel
 
+    // viewModels()
     private lateinit var binding: ActivityFirstMvvmBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -21,5 +23,10 @@ class FirstMvvmActivity : AppCompatActivity() {
         //在使用控件的时候，可以直接使用Binding对象中的属性，无需findViewById
         binding.tvText.setText("1232")
         //viewModel
+
+        val observer = Observer<String> {
+            binding.tvText.setText(it)
+        }
+        viewModel.currentName.observe(this, observer)
     }
 }
