@@ -167,12 +167,26 @@
 * 在Compose中：通过`remember`+`mutableStateOf`可以创建一个可观察的对象。
 * 与其他可观察类不同的是：LiveData具有生命周期感知能力，可遵循其他组件(Activity、Fragment或Service)的生命周期。
 * LiveData仅更新处于活跃状态的应用组件观察者。
-  
-* 如果观察者(Observer)的生命周期处于Started或Resumed，则LiveData会认为该观察者处于活跃状态。
-* LiveData只会将更新通知活跃的观察者。非活跃观察者不会收到通知。
-* 注册与实现了LifecycleOwner接口的对象配对的观察者。当相应的Lifecycle对象变为Destoried时，就可移除该观察者。
-* Activity/Fragment可以放心观察LiveData对象，而不担心泄漏（在Activity）/Fragment的生命周期被销毁时，系统会立刻退订它们）。
+  [从这句话中可以似乎可以总结为：LiveData是被观察者，负责注册观察者，而观察者是在Activity在/Fragment。发生变化的，及时通知观察者]
+* 当观察者Observer的生命周期处于Started和Resumed，则LiveData会将该观察者为活跃状态。那些虽然注册LiveData但非活跃观察者不会收到通知。
+* 与注册实现LifecycleOwner接口的对象为观察者。当Lifecycle对象的状态变为Destoried时，便可移除次观察者。
+* AppCompatActivity/Fragment实现了LifecycleOwner接口，可以放心观察LiveData对象，而不必担心泄漏
+  （在Activity）/Fragment生命周期被销毁时，系统会立刻退订它们）。
 * [优势]
+    - LiveData遵循观察者模式。当底层数据发生变化的时候，会自动通知Observer，通常这些Observer对象就是用来更新界面。从而在应用数据发生改变的时候自动更新UI。
+    - 不会发生内存泄漏。观察者即Activity/Fragment实现了Life
+    - [TODO 未完]
+* [如何使用LiveData]
+    - 在ViewModel中创建LiveData实例
+    - 在Activity/Fragment中创建Observer对象，该方法可以控制在LiveData对象存储的数据发生更改的时候会发生什么。
+    - 在Activity/Fragment中通过observe()
+      将Observer对象附加到LiveData对象上。 ` viewModel.currentName.observe(this, observer)`
+      ？？？？？？？？？？？？
+* []
+    - `MutableLiveData` ：公开setValue/getValue的LiveData。
+        - 可通过MutableLiveData()和MutableLiveData(T value)来创建一个对象，参数就是为观察对象设置的初始值。
+    - `SliceLiveData.CachedSliceLiveData`
+    - `MediatorLiveData`
 
 ### 3.ViewModel - [为页面准备数据]
 

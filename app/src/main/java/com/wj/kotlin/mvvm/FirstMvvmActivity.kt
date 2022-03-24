@@ -25,6 +25,12 @@ class FirstMvvmActivity : AppCompatActivity() {
         binding.tvText.setText("1232")
         //viewModel
 
+
+//        val observer = object:Observer<String>{
+//            override fun onChanged(it: String?) {
+//                binding.tvText.setText(it)
+//            }
+//        }
         val observer = Observer<String> {
             binding.tvText.setText(it)
         }
