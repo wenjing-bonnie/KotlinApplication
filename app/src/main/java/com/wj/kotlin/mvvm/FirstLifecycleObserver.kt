@@ -10,9 +10,22 @@ import androidx.lifecycle.LifecycleOwner
 class FirstLifecycleObserver : DefaultLifecycleObserver {
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
+        println(owner.lifecycle.currentState)
     }
 
     override fun onResume(owner: LifecycleOwner) {
         super.onResume(owner)
+        println(owner.lifecycle.currentState)
+    }
+
+    override fun onPause(owner: LifecycleOwner) {
+        super.onPause(owner)
+        println(owner.lifecycle.currentState)
+    }
+
+    override fun onStop(owner: LifecycleOwner) {
+        super.onStop(owner)
+        println(owner.lifecycle.currentState)
+
     }
 }

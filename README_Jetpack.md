@@ -6,6 +6,15 @@
 * LiveData：创建数据对象，在基础数据库改变时通知视图
 * ViewModel：存储界面相关的数据，这些数据不会在应用旋转时销毁
 * Room：SQLite对象映射库。可以将SQLite表转换成java对象，并且返回Rxjava、Flowable、LiveData可观察对象
+* 最佳做法
+    - Activity/Fragment尽可能保持精简。随着数据更改而更新视图，或将用户操作通知给ViewModel
+        - Activity/Fragment不要获取自己的数据，通过ViewModel执行此操作
+        - 观察LiveData对象以更改体现到视图中
+    - ViewModel为Activity/Fragment和其他应用部分的连接器。
+        - ViewModel不负责获取数据(例如从网络上获取数据)，但是是调用其他组件来获取数据，然后将结果提供给Activity/Fragment
+        - 避免在ViewModel中引用View或Context。ViewModel的生命周期要比Activity长，避免内存泄漏
+    - LiveData进行数据绑定可以在视图与Activity/Fragment？？？？？
+    - Coroutine 协程管理长时间运行的任何和其他可以异步运行的操作。
 
 ### 1.MVVM
 
@@ -16,7 +25,7 @@
     - 理论上每个Activity/Fragment都会创建一个ViewModel
 * 为了统一管理网格数据和本地数据，又引入了Repository中间管理层。本质是为了更好管理数据，可以称为Model层
 
-### 2.视图绑定ViewBinding - [视图绑定代替之前的findViewById/setContentView]
+### 2.ViewBinding 视图绑定 - [视图绑定代替之前的findViewById/setContentView]
 
 * 将XML布局文件生成一个绑定类。绑定类的实例中包含具有Id的控件的直接引用。
 * [原理] 在编译期间会为每个布局文件生成一个绑定类，该绑定类具有以下特点：
@@ -103,16 +112,67 @@
     - 视图绑定不支持布局变量或布局表达式，因此不能直接在XML中声明动态布局
     - 不支持双向数据绑定。
 
-### 2. LiveData - [可观察的数据存储类]
+### 2.Lifecycle - [Activity/Fragment将生命周期转移到Lifecycle进行处理]
 
-* 在Compose中接触过通过`remember`+`mutableStateOf`可以创建一个可观察的对象。
-* 与其他可观察类不同的是：LiveData具有生命感知能力，可遵循其他组件(Activity、Fragment或Service)的生命周期。
-* 这种感知能力可确保LiveData仅更新处于活跃状态的应用组件观察者。
+* [什么是Lifecycle] Lifecycle是一个类，为Activity/Fragment生命周期的观察类，监听生命周期的变化并可以做出响应。并允许其他对象观察此状态。
+* [解决的问题] (1)在组件的生命周期中放置大量的代码，难以维护。(2) 无法保证长时间运行的操作，无法保证在Activity/Fragment停止之前启动(
+  例如：在onStart里面启动定位，但是还没有启动完成，就关闭了页面，导致该定位服务没有启动起来)。
+* [实现方式]
+    - 自定义类实现`DefaultLifecycleObserver`
+    - 通过`Lifecycle.addObserver()`传递观察器的实例来添加观察器
+* [两个角色] `观察者模式：被观察对象(LifecycleOwner)发生变化的时候，通知观察者，所以被观察对象需要注册观察者。观察者(LifecycleObserver)负责监听被观察对象的变化。`
+    - 第一个是[LifecycleOwner]：接口类，只有一个`Lifecycle getLifecycle()`需要实现，在kotlin中就是lifecycle的成员变量需要复写
+      。生命周期拥有者，被观察者。如果一个类实现该接口，那么该类就具有了Lifecycle。
+        - support库26.1.0及更高版本中的AppCompatActivity/Fragment已经实现该接口。
+        - ProcessLifecycleOwner：监听整个应用进程的生命周期。[TODO 这个以后在研究下！！！！！！！！]
+            - 仅调用观察者的`onCreate`一次
+            - 不会调用观察者的`onDestroy`
+            - 仅在当一个Activity执行生命周期的时候才调用观察者的`onStart/onResume`
+            - 最后一个Activity执行生命周期的时候延时调用观察者的`onPause/onStop`。该延时可以保证在Activity销毁和配置更改时重建时不发送任何消息。
+            - 只针对当前进程
+        - 自定义类实现LifecycleOwner，那么在得到Lifecycle的时候，通过` lifecycleRegistry = LifecycleRegistry(this)`
+          得到一个`LifecycleRegistry`，将事件转发到该类。
+          ```  
+              public override fun onStart() {
+                    super.onStart()
+                    lifecycleRegistry.markState(Lifecycle.State.STARTED)
+                }
+
+                override fun getLifecycle(): Lifecycle {
+                    return lifecycleRegistry
+                }
+          ```
+
+    - 第二个是[LifecycleObserver]
+      ：生命周期观察者，实现该接口后Owner就可以将该Observer添加Lifecycle中，从而在owner的生命周期发生改变时能马上接收到通知。
+        - 自定义类实现`DefaultLifecycleObserver`接口即可
+        - 通常在Activity的onCreate()进行实例化
+
+* [owner注册observer] getLifecycle()
+  /lifecycle获得Lifecycle，进而通过`getLifecycle()/lifecycle.addObserver(observer)`添加观察者。
+* [应用场景]
+    - 开始和停止网络连接。在应用处于前台时启用网络数据实时更新，在进入后台时自动暂停
+    - 暂停和恢复动画可绘制资源
+    - 停止和开始缓冲视频
+    - 粗粒度和细粒度位置更新切换。
+* [处理onStop事件]
+    - onSaveInstanceState()不是生命周期方法，在应用由onPause -> onSaveInstanceState -> onStop的时调用。
+    - 在AppCompatActivity/Fragment实现了Lifecycle接口，那么在调用onSaveInstanceState()时，会将状态变更为CREATED(
+      即调用到Observer的onCreate)，不在分发onStop事件(即不在调用Observer的onStop)。
+    - LiveData在避免这种极端情况：在观察者管理的Lifecycle还没有至少处于Started状态时避免调用其观察者。在后台，在调用其观察者之前调用isAtLeast()。
+      [这个在看LiveData的时候在详细看下！！！！]
+
+### 3. LiveData - [具有生命周期感知的可观察的数据存储类]
+
+* 在Compose中：通过`remember`+`mutableStateOf`可以创建一个可观察的对象。
+* 与其他可观察类不同的是：LiveData具有生命周期感知能力，可遵循其他组件(Activity、Fragment或Service)的生命周期。
+* LiveData仅更新处于活跃状态的应用组件观察者。
+  
 * 如果观察者(Observer)的生命周期处于Started或Resumed，则LiveData会认为该观察者处于活跃状态。
 * LiveData只会将更新通知活跃的观察者。非活跃观察者不会收到通知。
 * 注册与实现了LifecycleOwner接口的对象配对的观察者。当相应的Lifecycle对象变为Destoried时，就可移除该观察者。
 * Activity/Fragment可以放心观察LiveData对象，而不担心泄漏（在Activity）/Fragment的生命周期被销毁时，系统会立刻退订它们）。
-* [优势] 
+* [优势]
 
 ### 3.ViewModel - [为页面准备数据]
 
@@ -125,15 +185,4 @@
 * 为界面准备数据。在配置更改期间自动保留ViewModel对象，以便它们存储的数据立即可提供给下一个Activity/Fragment实例使用。
 * [生命周期] ViewModel对象存在的范围是：获取`ViewModel`时传给了`ViewModelProvider`的`Lifecycle`。
   `ViewModel`将一直留在内存中，直到限定其存在时间范围的`Lifecycle`永久消失；Activity是activity完成时，对于Fragment是Fragment分离时。
-* ViewModel确保数据在社保配置更改后仍然存在。Room在数据库发生更改时通知LiveData
-
-### 1.Lifecycle
-
-* 让某一个类变成Activity/Fragment生命周期的观察类，监听生命周期的变化并可以做出响应。
-* 解决的问题：在组件的生命周期中放置大量的代码，难以维护。
-* 有两个角色
-    - LifecycleOwner：生命周期拥有者，Activity/Fragment实现该接口，通过getLifecycle()获得Lifecycle，进而通过addObserver()
-      添加观察者。
-    - LifecycleObserver：生命周期观察者，实现该接口后就可以添加Lifecycle中，从而在被观察者类生命周期发生改变时能马上接收到通知。
-* 将生命周期的方法转移到 `Lifecycle`：用于存储有关组件(Activity/Fragment)的生命周期状态的信息，并允许其他对象观察此状态。    
-    
+* ViewModel确保数据在社保配置更改后仍然存在。Room在数据库发生更改时通知LiveData    

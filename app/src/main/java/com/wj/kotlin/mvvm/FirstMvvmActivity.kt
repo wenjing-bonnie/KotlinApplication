@@ -2,6 +2,7 @@ package com.wj.kotlin.mvvm
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.PersistableBundle
 import android.view.LayoutInflater
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -27,6 +28,32 @@ class FirstMvvmActivity : AppCompatActivity() {
         val observer = Observer<String> {
             binding.tvText.setText(it)
         }
+
         viewModel.currentName.observe(this, observer)
+
+        //生命周期
+        lifecycle.addObserver(FirstLifecycleObserver())
+    }
+
+    override fun onResume() {
+        super.onResume()
+        println(" == onResume  == ")
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+
+        println(" ==  onSaveInstanceState  == ")
+        super.onSaveInstanceState(outState)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        println(" == onPause == ")
+    }
+
+    override fun onStop() {
+
+        println(" == onStop == ")
+        super.onStop()
     }
 }
