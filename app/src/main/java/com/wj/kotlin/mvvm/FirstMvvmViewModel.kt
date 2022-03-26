@@ -12,8 +12,9 @@ import kotlinx.coroutines.launch
  * create by wenjing.liu at 2022/3/23
  */
 class FirstMvvmViewModel : ViewModel() {
+    //最好给定初始值，那么就是通过MutableLiveData的构造函数传入即可
     val currentName: MutableLiveData<String> by lazy {
-        MutableLiveData<String>()
+        MutableLiveData<String>("初始值")
     }
 
     fun loadUserFromServer() {

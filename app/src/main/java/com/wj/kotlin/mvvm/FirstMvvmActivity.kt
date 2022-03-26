@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.os.PersistableBundle
 import android.view.LayoutInflater
 import android.view.View
+import androidx.activity.viewModels
 import androidx.lifecycle.*
 import com.wj.kotlin.R
 import com.wj.kotlin.databinding.ActivityFirstMvvmBinding
@@ -12,11 +13,18 @@ import com.wj.kotlin.databinding.ActivityFirstMvvmMessageBinding
 import kotlinx.coroutines.launch
 
 class FirstMvvmActivity : AppCompatActivity() {
+    //第一种方式：  viewModel = ViewModelProvider(this)[FirstMvvmViewModel::class.java]
     lateinit var viewModel: FirstMvvmViewModel
+
+    //第二种方式：可以通过扩展函数viewModels()来懒加载viewmodel
+    private val viewmodel: FirstMvvmViewModel by viewModels()
+    // 在fragment中使用activityViewModels()可得到fragment所在的Activity的Viewmodels的，
+    // 在该Activity的所有Fragment的Viewmodels都是同一个实例。
 
     // viewModels()
     private lateinit var binding: ActivityFirstMvvmBinding
     private lateinit var messageBinding: ActivityFirstMvvmMessageBinding
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
