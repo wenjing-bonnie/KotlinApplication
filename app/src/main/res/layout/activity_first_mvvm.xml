@@ -4,25 +4,44 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:paddingLeft="@dimen/dimen_20"
+    android:paddingRight="@dimen/dimen_20"
     tools:context=".mvvm.FirstMvvmActivity">
 
     <TextView
-        android:id="@+id/tv_text"
-        android:layout_width="wrap_content"
+        android:id="@+id/tv_title"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Hello"
+        android:gravity="center_horizontal"
+        android:text="@string/title"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBaseline_creator="@+id/btn_button"
-        />
-
-    <Button
-        android:id="@+id/btn_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="点击"
-        android:layout_marginLeft="20dp"
-        app:layout_constraintLeft_toRightOf="@+id/tv_text"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/et_input_password"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_title" />
+
+    <EditText
+        android:id="@+id/et_input_password_again"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/et_input_password" />
+
+
+    <!-- 如果我们尝试为该 <include>+<merge> 提供ID，view binding 不会在绑定类中生成ID，因此我们无法像使用普通 include 那样访问视图。
+     因为既要求对里面的每个字段进行赋值，所以必须要用id
+    要用 ActivityFirstMvvmMessageBinding.bind(binding.root)得到ActivityFirstMvvmMessageBinding实例，通过该实例获取里面的控件-->
+
+    <include
+        layout="@layout/activity_first_mvvm_message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/et_input_password_again" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

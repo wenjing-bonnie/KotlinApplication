@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".mvvm.FirstMvvmActivity">
+
+    <ImageView
+        android:id="@+id/iv_first"
+        android:layout_width="@dimen/dimen_20"
+        android:layout_height="@dimen/dimen_20"
+        android:src="@drawable/ic_launcher123"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/et_input_password_again" />
+
+    <TextView
+        android:id="@+id/tv_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="密码强度...."
+        app:layout_constraintLeft_toRightOf="@+id/iv_first"
+        app:layout_constraintTop_toBottomOf="@+id/et_input_password_again" />
+
+    <CheckBox
+        android:id="@+id/cb_second"
+        android:layout_width="@dimen/dimen_20"
+        android:layout_height="@dimen/dimen_20"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/iv_first" />
+
+    <TextView
+        android:id="@+id/tv_password_length"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/password_length"
+        app:layout_constraintLeft_toRightOf="@+id/cb_second"
+        app:layout_constraintTop_toBottomOf="@+id/iv_first" />
+
+
+    <CheckBox
+        android:id="@+id/cb_third"
+        android:layout_width="@dimen/dimen_20"
+        android:layout_height="@dimen/dimen_20"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/cb_second" />
+
+    <TextView
+        android:id="@+id/tv_password_limit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/password_limit"
+        app:layout_constraintLeft_toRightOf="@+id/cb_third"
+        app:layout_constraintTop_toBottomOf="@+id/cb_second" />
+
+</merge>

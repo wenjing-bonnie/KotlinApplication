@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">KotlinApplication</string>
     <string name="title_activity_first_compose">FirstComposeActivity</string>
+    <string name="title">请输入新密码</string>
+    <string name="password_length">密码长度必须满足8~20个字符</string>
+    <string name="password_limit">至少包含以下类型中的三种：</string>
+    <string name="password_bold">数字、小写字母、大写字母、特殊字母</string>
 </resources>
