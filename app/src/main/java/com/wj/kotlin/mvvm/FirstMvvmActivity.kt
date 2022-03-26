@@ -4,10 +4,10 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.PersistableBundle
 import android.view.LayoutInflater
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.*
 import com.wj.kotlin.R
 import com.wj.kotlin.databinding.ActivityFirstMvvmBinding
+import kotlinx.coroutines.launch
 
 class FirstMvvmActivity : AppCompatActivity() {
     lateinit var viewModel: FirstMvvmViewModel
@@ -39,6 +39,12 @@ class FirstMvvmActivity : AppCompatActivity() {
 
         //生命周期
         lifecycle.addObserver(FirstLifecycleObserver())
+        lifecycle.coroutineScope.launch {  }
+        this.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED){
+
+            }
+        }
     }
 
     override fun onResume() {

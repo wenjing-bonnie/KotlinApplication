@@ -177,26 +177,74 @@
     - 不会发生内存泄漏。观察者即Activity/Fragment实现了Life
     - [TODO 未完]
 * [如何使用LiveData]
-    - 在ViewModel中创建LiveData实例
-    - 在Activity/Fragment中创建Observer对象，该方法可以控制在LiveData对象存储的数据发生更改的时候会发生什么。
-    - 在Activity/Fragment中通过observe()
-      将Observer对象附加到LiveData对象上。 ` viewModel.currentName.observe(this, observer)`
-      ？？？？？？？？？？？？
+    - (1)在ViewModel中创建LiveData实例
+        - `MutableLiveData` ：公开setValue/getValue的LiveData。
+            - 可通过MutableLiveData()和MutableLiveData(T value)来创建一个对象，参数就是为观察对象设置的初始值。
+            - 通常在ViewModel中公开不可变的LiveData对象。
+        - `SliceLiveData.CachedSliceLiveData`
+        - `MediatorLiveData`
+    - (2)在Activity/Fragment中创建Observer对象，该方法可以控制在LiveData对象存储的数据发生更改的时候会发生什么。
+    - (3)在Activity/Fragment中通过observe()
+      将Observer对象附加到LiveData对象上。` viewModel.currentName.observe(this, observer)`。
+        - 通常在onCreate()开始观察LiveData对象
+        - 可通过observeForEver(Observer)
+          为没有关联LifecycleOwner对象的情况下注册一个观察者。此时会认为该观察者始终为活跃状态，直到调用removeObserver(Observer)来移除这些观察者。
+    - (4)调用setValue(主线程)/postValue(工作线程)更新LiveData里面的对象，然后触发Observer的onChange，从而更新UI。
 * []
-    - `MutableLiveData` ：公开setValue/getValue的LiveData。
-        - 可通过MutableLiveData()和MutableLiveData(T value)来创建一个对象，参数就是为观察对象设置的初始值。
-    - `SliceLiveData.CachedSliceLiveData`
-    - `MediatorLiveData`
 
-### 3.ViewModel - [为页面准备数据]
+### 4.ViewModel - [为页面准备数据，在配置更改期间自动保留ViewModel对象，在Activity完成时，自动调用onCleared，清理资源]
 
 * [解决问题 1] 页面销毁或重新创建界面控制器，则存储在其中的任何瞬态界面相关数据都会丢失，
   例如在某个Activity中有一个列表，为配置更改后重新创建Activity后，新Activity必须重新拉取数据。 对于简单的数据，可以通过`onSaveInstanceState()`
   从`onCreate()`中的bundle中恢复数据，但仅适合可以序列化的少量数据。 不适合可能比较大的数据，例如用户列表或位图。
-* [解决问题 2]   页面的一些异步调用，需要在页面销毁后清理这些调用避免内存泄漏，引起大量维护工作，并且在为配置更改重新创建对象的情况下，会造成资源浪费。
-* 将视图的数据分离。
-* 注重生命周期的方式存储和管理界面相关的数据。可以让数据在发生屏幕旋转等配置更改后继续留存。（那是不是就有一个释放的问题？？？）
-* 为界面准备数据。在配置更改期间自动保留ViewModel对象，以便它们存储的数据立即可提供给下一个Activity/Fragment实例使用。
+* [解决问题 2] 页面的一些异步调用，需要在页面销毁后清理这些调用避免内存泄漏，引起大量维护工作，并且在为配置更改重新创建对象的情况下，会造成资源浪费。
 * [生命周期] ViewModel对象存在的范围是：获取`ViewModel`时传给了`ViewModelProvider`的`Lifecycle`。
   `ViewModel`将一直留在内存中，直到限定其存在时间范围的`Lifecycle`永久消失；Activity是activity完成时，对于Fragment是Fragment分离时。
-* ViewModel确保数据在社保配置更改后仍然存在。Room在数据库发生更改时通知LiveData    
+* [ViewModel特点] 将视图的数据分离。
+    - 在配置更改期间自动保留ViewModel对象，以便它们存储的数据立即可提供给下一个Activity/Fragment实例使用，使用的是同一个ViewModel对象。
+    - 绝对不能引用视图、Lifecycle、或任何含有Context的引用的类
+    - 可以含有LifecycleObserver，如LiveData，但是不能更改[TODO这个不理解？？？？那LiveData对象的数据更改在哪里？？？]
+    - 若需要Application上下文，需要实现扩展AndroidViewModel类并设置接收Application的构造函数
+* [应用场景] 为页面准备数据，可以在配置发生改变的时候，保持当前ViewModel，传递给重新创建的Activity。
+    - Fragment 在Activity中的两个或多个Fragment共享数据。
+
+
+* ViewModel确保数据在社保配置更改后仍然存在。Room在数据库发生更改时通知LiveData
+
+## 二、 coroutine与架构组件
+
+### 1. ViewModelScope
+
+* 为每个ViewModel定义了ViewModelScope。如果ViewModel清除，则此范围启动的协程会自动取消。
+* 可以限定仅在ViewModel处于活动状态时才需要完成的工作，当ViewModel清除时，可自动取消工作比避免消耗资源。
+
+``` 
+        viewModelScope.launch {
+        }
+```
+
+### 2. LifecycleScope
+
+* 为每个Lifecycle对象定义了LifecycleScope。在此范围内启动的协程，会随着Lifecycle被消耗时取消。
+
+``` 
+        lifecycle.coroutineScope.launch {  }
+        lifecycleowner.lifecycleScope.launch {  }
+```
+
+* 重启生命周期感知型协程。 默认的LifecycleScope在destoryed的时候会自动取消长时间运行的操作。
+  但是某些情况下需要特定状态下执行代码块，并处于其他状态时取消。例如：在started时收集数据流，在stopped时取消收集。 -
+    - 通过 ` lifecycle.coroutineScope.launch { }`或`lifecycleowner.lifecycleScope.launch { }`创建一个协程
+    - 通过`repeatOnLifecycle`来设置在started状态时运行代码
+  ```  
+          this.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED){
+                
+            }
+        }
+  ```  
+* 挂起生命周期：lifecycle.whenCreated/whenStarted/whenResumed：挂起在这些块内运行的任何协程。  
+
+### 3.与LiveData一起使用。
+
+* 在使用LiveData时，可能需要异步计算。例如

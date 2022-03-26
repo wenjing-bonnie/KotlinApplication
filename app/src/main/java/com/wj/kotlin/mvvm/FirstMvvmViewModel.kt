@@ -2,6 +2,7 @@ package com.wj.kotlin.mvvm
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -16,7 +17,7 @@ class FirstMvvmViewModel : ViewModel() {
     }
 
     fun loadUserFromServer() {
-        GlobalScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             delay(2000)
             currentName.value = "更改名字了"
         }
