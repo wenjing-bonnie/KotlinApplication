@@ -17,8 +17,11 @@ class FirstMvvmViewModel : ViewModel() {
     }
 
     fun loadUserFromServer() {
+        //默认的为主线程
         viewModelScope.launch {
+            println("当前线程：${Thread.currentThread().name}")
             delay(2000)
+            println("当前线程正在延时2s")
             currentName.value = "更改名字了"
         }
 
