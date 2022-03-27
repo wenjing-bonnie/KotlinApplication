@@ -1,5 +1,46 @@
 # Jetpack
 
+## 汇总架构组件知识点
+
+### 1.ViewBinding
+
+* [实现功能] 代替之前的findViewById实例化控件方式
+* [原理] 在编译阶段将布局文件生成绑定类，在绑定类中会实例化所有设置id的控件
+* [使用步骤]
+    - (1) 在build.gradle中配置`buildFeatures { viewBinding true }`
+    - (2) 在Activity中通过`绑定类.inflater(inflater)`
+      实例化绑定类，然后将绑定类的rootView添加到`setContentView(bingding.rootView)`
+        - 注意点1：一定不要在Activity中在调用`setContentView(R.layout.)`，否则会添加多个View
+        - 注意点2：`include+merge`方式的布局文件，需要单独在Activity中添加merge的布局文件的绑定类，并且include处不能添加id
+        - 注意点3：在Fragment/Adapter中通过通过`绑定类.inflater(inflater,parent,attachToParent)`实例化绑定类
+        - 注意点4：在Fragment必须在`onDestroy()`的时候，对绑定类置空`binding = null`
+    - (3) 直接通过`binding.控件`就可以使用控件实例
+* [关闭某个布局文件的ViewBinding] 在布局文件中设置`tools:viewBindingIgnore="true"`
+* [优势] Type safety(与xml类型匹配)和Null safety(可以在编译阶段对控件为空的情况下抛出编译异常)
+
+### 2.Lifecycle
+
+* [实现功能] Activity/Fragment生命周期的监听，将Activity/Fragment转移到Observer类中
+* [原理] 包括两部分：LifecycleOwner和LifecycleObserver。
+    - 第一个部分：LifecycleOwner为被观察者，持有一个 Lifecycle来add和remove观察者。
+        - (1) 在support中的AppComposeActivity/Fragment都已经默认实现了LifecycleOwner。所以可直接获得 `lifecycle`
+          ，通过`lifecycle.addObserver(observer)`来注册观察者。
+            - 注意点1：若要将Fragment的生命周期转移到Observer，需要在Fragment的`lifecycle.addObserver(observer)`来注册观察者。
+        - (2) 支持自定义Activity/Fragment类任何类实现LifecycleOwner，那么该自定义Activity/Fragment就可以注册观察者，
+          从而将生命周期方法转移到Observer类中。
+            - 注意点1：在复写`lifecycle`的时候，可通过registry = LifecycleRegistry(this)得到一个`lifecycle`
+            - 注意点2：需要在Activity/Fragment的生命周期方法中通过`lifecycleRegistry.markState(Lifecycle.State.xx)`
+              设置对应的Observer的State
+        - (3) 实现ProcessLifecycleOwner，即可管理整个APP进程的生命周期。可在Observer中观察到APP进程的前台/后台的状态。
+
+      [TODO 遗留问题： 需要确认下源码中是怎么移除这个观察者的？？？？？]
+    - 第二个部分：LifecycleObserver为观察者，负责来处理生命周期相关的逻辑。当Activity和Fragment的生命周期发生变化的时候，会通知到观察者的对应生命周期方法。
+        - State
+        - Event
+* [使用步骤]    
+
+=============== 详细解析 ================
+
 ## 一、架构组件
 
 * Lifecycle：新的生命周期感知型组件
@@ -120,7 +161,9 @@
 * [实现方式]
     - 自定义类实现`DefaultLifecycleObserver`
     - 通过`Lifecycle.addObserver()`传递观察器的实例来添加观察器
+* [两个枚举类] State和Event
 * [两个角色] `观察者模式：被观察对象(LifecycleOwner)发生变化的时候，通知观察者，所以被观察对象需要注册观察者。观察者(LifecycleObserver)负责监听被观察对象的变化。`
+  所有者LifecycleOwner可以提供生命周期，而观察者可以注册以观察生命周期。
     - 第一个是[LifecycleOwner]：接口类，只有一个`Lifecycle getLifecycle()`需要实现，在kotlin中就是lifecycle的成员变量需要复写
       。生命周期拥有者，被观察者。如果一个类实现该接口，那么该类就具有了Lifecycle。
         - support库26.1.0及更高版本中的AppCompatActivity/Fragment已经实现该接口。
@@ -243,7 +286,7 @@
             }
         }
   ```  
-* 挂起生命周期：lifecycle.whenCreated/whenStarted/whenResumed：挂起在这些块内运行的任何协程。  
+* 挂起生命周期：lifecycle.whenCreated/whenStarted/whenResumed：挂起在这些块内运行的任何协程。
 
 ### 3.与LiveData一起使用。
 

@@ -8,6 +8,7 @@ import androidx.lifecycle.LifecycleOwner
  * 生命周期的监听
  */
 class FirstLifecycleObserver : DefaultLifecycleObserver {
+
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
         println(owner.lifecycle.currentState)

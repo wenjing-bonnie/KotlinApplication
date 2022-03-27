@@ -24,7 +24,7 @@ class FirstMvvmActivity : AppCompatActivity() {
     // viewModels()
     private lateinit var binding: ActivityFirstMvvmBinding
     private lateinit var messageBinding: ActivityFirstMvvmMessageBinding
-
+    private var registry = LifecycleRegistry(this)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,7 +52,7 @@ class FirstMvvmActivity : AppCompatActivity() {
         }
         viewModel.currentName.observe(this, observer)
 
-
+        println("activity hash code = " + viewModel.hashCode())
 
 
 
