@@ -51,6 +51,7 @@ class FirstMvvmActivity : AppCompatActivity() {
             binding.tvTitle.setText(name)
         }
         viewModel.currentName.observe(this, observer)
+       // viewModel.currentName.observeForever()
 
         println("activity hash code = " + viewModel.hashCode())
 

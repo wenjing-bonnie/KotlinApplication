@@ -29,15 +29,64 @@
         - (2) 支持自定义Activity/Fragment类任何类实现LifecycleOwner，那么该自定义Activity/Fragment就可以注册观察者，
           从而将生命周期方法转移到Observer类中。
             - 注意点1：在复写`lifecycle`的时候，可通过registry = LifecycleRegistry(this)得到一个`lifecycle`
-            - 注意点2：需要在Activity/Fragment的生命周期方法中通过`lifecycleRegistry.markState(Lifecycle.State.xx)`
-              设置对应的Observer的State
+            -
+          注意点2：需要在Activity/Fragment的生命周期方法中通过`lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.xxx)`
+          设置对应的Observer的Event
+          [TODO 遗留问题： 需要验证下是不是需要markState？？？？？？？？]
         - (3) 实现ProcessLifecycleOwner，即可管理整个APP进程的生命周期。可在Observer中观察到APP进程的前台/后台的状态。
+          [TODO 遗留问题： 需要验证下]
 
-      [TODO 遗留问题： 需要确认下源码中是怎么移除这个观察者的？？？？？]
+          [TODO 遗留问题： 需要确认下源码中是怎么移除这个观察者的？？？？？]
+
     - 第二个部分：LifecycleObserver为观察者，负责来处理生命周期相关的逻辑。当Activity和Fragment的生命周期发生变化的时候，会通知到观察者的对应生命周期方法。
-        - State
-        - Event
-* [使用步骤]    
+        - State：对应Activity和Fragment的当前状态
+        - Event：对应的生命周期的onCreate/onStart...。
+          通常实现DefaultLifecycleObserver即可在Activity和Fragment的生命周期方法调用的时候，调用到对应的方法。
+
+* [使用步骤]
+    - (1) 自定义类实现LifecycleOwner，在support中的AppComposeActivity/Fragment已经完成该步骤
+    - (2) 获取lifecycle，通过lifecycle.addObserver(observer)注册观察者
+    - (3) 自定义类实现DefaultLifecycleObserver/LifecycleEventObserver，来实现在生命周期方法中的相关管理。
+        - 第一种方式：直接复写对应的接口方法，如onCreate()/onResume()等(Java1.8更推荐这种方式)
+        - 第二种方式：直接实现LifecycleObserver，通过注解例如`@OnLifecycleEvent(Lifecycle.Event.ON_CREATE)`(
+          Java1.7之前采用)
+        - 如果同时实现了DefaultLifecycleObserver/LifecycleEventObserver，那先调用到DefaultLifecycleObserver，
+          然后在调用到LifecycleEventObserver的`onStateChanged()`
+
+### 3.LiveData
+
+* [实现功能] 具有生命周期感知的可观察的数据存储类。
+* [原理] 在LifecycleOwner上注册了一个Observer，该Observer??????
+* [使用步骤] 通常定义ViewModel中并进行实例化
+    - (1) 在ViewModel中定义LiveData观察的数据
+        - 通过MutableLiveData，其中可通过构造函数传入默认值
+         ``` 
+            val currentName: MutableLiveData<String> by lazy {
+                MutableLiveData<String>("初始值")
+            }
+         ``` 
+        - MediatorLiveData ？？？？？？
+        - SliceLiveData.CachedSliceLiveData？？？？？？
+    - (2) 在Activity和Fragment中定义Observer，用来设置当数据发生变化之后的逻辑：
+      ``` 
+        val observer = Observer<String> { name ->
+            println("变化了的name为：$name")
+             binding.tvTitle.setText(name)
+        }
+       ```
+    - (3) 在Activity和Fragment中通过LiveData.observe，将在LifecycleOwner中注册该观察者。 以实现目的：[在生命周期活跃状态(
+      Started/Resumed)状态的时候，接收数据变化；在Lifecycle处于Destroyed时可以移除该观察者]
+        ```
+        viewModel.currentName.observe(this, observer)
+        ```
+    - (4) 在主线程中通过`LiveData.setValue`设置数据值，在子线程通过`LiveData.postValue`
+    - 上面的(2)和(3)通常在onCreate()中实现。
+* 当然也可以为没有关联LifecycleOwner的情况下观察数据
+    - 通过`LiveData.observeForever()`的方式进行观察数据，但必须通过`LiveData.removeObserver()`来移除观察者。
+
+### 4.ViewModel
+
+* [实现功能] 为页面准备数据，在配置发生改变的时候，保留数据；在Activity完成时自动清理数据。持有LiveData
 
 =============== 详细解析 ================
 
@@ -162,6 +211,11 @@
     - 自定义类实现`DefaultLifecycleObserver`
     - 通过`Lifecycle.addObserver()`传递观察器的实例来添加观察器
 * [两个枚举类] State和Event
+    - INITIALIZED：onCreate()调用之前的状态
+    - RESUMED：onResume()调用之后的状态，处于可交互状态
+    - DESTROYED： onDestroy()调用之后的状态 ，此时Activity 不存在，或者已经销毁
+    - CREATED：onCreate()之后和onStop()之后，此时处于不在前台，但没有被销毁
+    - STARTED：onStart()之后和onPause()刚执行完，此时处于可见，但不可交互
 * [两个角色] `观察者模式：被观察对象(LifecycleOwner)发生变化的时候，通知观察者，所以被观察对象需要注册观察者。观察者(LifecycleObserver)负责监听被观察对象的变化。`
   所有者LifecycleOwner可以提供生命周期，而观察者可以注册以观察生命周期。
     - 第一个是[LifecycleOwner]：接口类，只有一个`Lifecycle getLifecycle()`需要实现，在kotlin中就是lifecycle的成员变量需要复写
