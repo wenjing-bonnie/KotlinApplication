@@ -52,11 +52,15 @@
           Java1.7之前采用)
         - 如果同时实现了DefaultLifecycleObserver/LifecycleEventObserver，那先调用到DefaultLifecycleObserver，
           然后在调用到LifecycleEventObserver的`onStateChanged()`
+* [Lifecycle+Coroutine] 可为每个Lifecycle对象定义LifecycleScope。 在此范围内启动的协程，会随着生命周期的结束而取消协程。
+    - 可通过` lifecycle.coroutineScope.launch{}`和` lifecycleowner.lifecycleScope.launch{}`来创建一个协程
+    - 可通过`lifecycle.launch{ repeatOnLifecycle(Lifecycle.State.xxx){ }}在运行对应状态的时候创建一个协程
+    - 可通过`lifecycle.whenCreated/whenStarted/whenResume`挂起协程？？？？？？[TODO这里还不理解]
 
 ### 3.LiveData
 
 * [实现功能] 具有生命周期感知的可观察的数据存储类。只会通知处于活跃状态的观察者，如果处于Paused或Destroy，将不在接收。
-* [原理] 在LifecycleOwner上注册了一个Observer，该Observer??????
+* [原理] 在LifecycleOwner上注册了一个Observer，该Observer??????[TODO这里还不理解]
 * [使用步骤] 通常定义ViewModel中并进行实例化
     - (1) 在ViewModel中定义LiveData观察的数据
         - 通过MutableLiveData，其中可通过构造函数传入默认值
@@ -71,7 +75,9 @@
             - 在Activity/Fragment中`mediator.observe(owner, observer)`注册观察者。
             - == 通过上面三步，就可以实现多个liveData的观察，注意在`mediator.observe()`的observer并不会收到onChanged ==
 
-        - SliceLiveData.CachedSliceLiveData？？？？？？
+        - SliceLiveData.CachedSliceLiveData？？？？？？[TODO这里还不理解]
+        - Transformations ????[TODO这里还不理解]
+        - 自定义LiveData ？？？？[TODO这里还不理解]
     - (2) 在Activity和Fragment中定义Observer，用来设置当数据发生变化之后的逻辑：
       ``` 
         val observer = Observer<String> { name ->
@@ -87,12 +93,37 @@
     - (4) 在主线程中通过`LiveData.setValue`设置数据值，在子线程通过`LiveData.postValue`
     - 上面的(2)和(3)通常在onCreate()中实现。
 
-* 当然也可以为没有关联LifecycleOwner的情况下观察数据
+* [为没有关联LifecycleOwner]的情况下观察数据
     - 通过`LiveData.observeForever()`的方式进行观察数据，但必须通过`LiveData.removeObserver()`来移除观察者。
+* [LiveData+Coroutine]
 
 ### 4.ViewModel
 
-* [实现功能] 为页面准备数据，在配置发生改变的时候，保留数据；在Activity完成时自动清理数据。持有LiveData
+* [实现功能] 为页面准备数据，在配置发生改变的时候，保留数据；在Activity完成时自动清理数据，避免异步调用造成内存泄漏。持有LiveData
+* [原理]
+    - 怎么保证在配置发生改变时保留数据？
+    - 怎么保证在Fragment中获取的是Activity中的实例？
+    - 怎么保证在生命周期结束的时候进行自动清理数据？？[TODO 后面需要根据源码继续了解下？？]
+* [使用步骤] 在Activity/Fragment中进行实例化ViewModel
+    - (1) 自定义类实现ViewModel接口
+        - 不能引用视图、Lifecycle或任何含有Context的引用类。因为生命周期比较长，会造成内存泄漏
+        - 持有LiveData，存储观察数据
+        - 若需要Application上下文，可实现AndroidViewModel，并设置接收Application的构造函数
+        - 为Fragment共用ViewModel
+    - (2) 在Activity/Fragment的实例化ViewModel
+        - 方法1：直接定义ViewModel实例，在onCreate()
+          中通过`viewModel = ViewModelProvider(this)[FirstMvvmViewModel::class.java]`实例化ViewModel
+        - 方法2：懒加载。
+            - 在Activity中`private val viewmodel: FirstMvvmViewModel by viewModels()`
+              。这里就是对Activity的扩展函数
+            - 在Fragment中`private val viewModel: FirstMvvmViewModel by activityViewModels()`
+              。这里就是对Fragment的扩展函数
+            - 在Fragment获取的ViewModel实例就是Activity中的实例
+* [生命周期] ViewModel会一直存在内存中，直到其范围内的生命周期完全结束，即Activity/Fragment完成时。
+    - ViewModel在配置发生改变的时候，虽然Activity会重新创建，但是该ViewModel实例是同一个
+    - 在Activity的Fragment会共享Activity中的ViewModel实例
+* [ViewModel+Coroutine] 为每个ViewModel定义了ViewModelScope的作用域。可以在ViewModel清除的时候，自动取消协程。
+  直接在ViewModel中使用 `viewModelScope.launch{}` 即可。
 
 =============== 详细解析 ================
 
