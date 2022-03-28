@@ -6,6 +6,7 @@ import android.os.PersistableBundle
 import android.view.LayoutInflater
 import android.view.View
 import androidx.activity.viewModels
+import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.*
 import com.wj.kotlin.R
 import com.wj.kotlin.databinding.ActivityFirstMvvmBinding
@@ -37,10 +38,10 @@ class FirstMvvmActivity : AppCompatActivity() {
         //一定不要在传入布局id，否则会添加多次，同时监听器也会添加到错误的布局对象中。
         setContentView(binding.root)
         //在使用控件的时候，可以直接使用Binding对象中的属性，无需findViewById
-        binding.tvTitle.setText("初始赋值")
+        binding.tvTitle.setText(viewModel.userName1.value + " , " + viewModel.username2.value)
         //3.设置生命周期的监听，可以将与生命周期相关的内容转移到Observer中进行处理
         lifecycle.addObserver(FirstLifecycleObserver())
-        //4.为viewModel的LiveData设置Observer，可以在被观察对象发生变化的时候，回调到onChanged，从而渲染UI
+        //4.为viewModel的LiveData设置Observer，可以在被观察对象发生变化的时候，回调到onChanged，从 ddd而渲染UI
 //        val observer = object:Observer<String>{
 //            override fun onChanged(it: String?) {
 //                binding.tvText.setText(it)
@@ -48,14 +49,24 @@ class FirstMvvmActivity : AppCompatActivity() {
 //        }
         val observer = Observer<String> { name ->
             println("变化了的name为：$name")
-            binding.tvTitle.setText(name)
+            //binding.tvTitle.setText(name)
         }
         viewModel.currentName.observe(this, observer)
-       // viewModel.currentName.observeForever()
+        // viewModel.currentName.observeForever()
 
-        println("activity hash code = " + viewModel.hashCode())
+        viewModel.users.observe(this, Observer {
+            println(" observe it = " + it)
+        })
+        viewModel.users.addSource(viewModel.userName1, Observer {
+            println("1 it = " + it)
+            //viewModel.userName1.value = 34
+        })
+        viewModel.users.addSource(viewModel.username2, Observer {
+            println("2 it = " + it)
+            //viewModel.userName1.value = 34
+        })
 
-
+        //binding.etInputPassword.addTextChangedListener {  }
 
 
         lifecycle.coroutineScope.launch { }

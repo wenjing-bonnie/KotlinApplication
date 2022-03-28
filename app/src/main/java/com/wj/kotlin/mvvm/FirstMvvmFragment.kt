@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.wj.kotlin.databinding.FragmentFirstMvvmBinding
 
 /**
@@ -24,8 +25,15 @@ class FirstMvvmFragment : Fragment() {
     ): View? {
         println("Fragment onCreateView = " + viewModel.hashCode())
         _binding = FragmentFirstMvvmBinding.inflate(inflater, container, false)
+        binding.btnClick.setOnClickListener {
+            viewModel.userName1.value = "zhangsan11 "
+            viewModel.username2.value = "zhangsan22 "
+        }
+        binding.tvMessage.setText(viewModel.currentName.value)
+
         return binding.root
     }
+
 
     override fun onDestroyView() {
         super.onDestroyView()

@@ -55,7 +55,7 @@
 
 ### 3.LiveData
 
-* [实现功能] 具有生命周期感知的可观察的数据存储类。
+* [实现功能] 具有生命周期感知的可观察的数据存储类。只会通知处于活跃状态的观察者，如果处于Paused或Destroy，将不在接收。
 * [原理] 在LifecycleOwner上注册了一个Observer，该Observer??????
 * [使用步骤] 通常定义ViewModel中并进行实例化
     - (1) 在ViewModel中定义LiveData观察的数据
@@ -65,7 +65,12 @@
                 MutableLiveData<String>("初始值")
             }
          ``` 
-        - MediatorLiveData ？？？？？？
+        - MediatorLiveData：可以注册多个观察者，将多个LiveData源数据集合起来。
+            - 在ViewModel中定义多个MutableLiveData实例和MediatorLiveData实例
+            - 在Activity/Fragment中通过`mediator.addSource(liveData, observer)`分别添加多个MutableLiveData实例
+            - 在Activity/Fragment中`mediator.observe(owner, observer)`注册观察者。
+            - == 通过上面三步，就可以实现多个liveData的观察，注意在`mediator.observe()`的observer并不会收到onChanged ==
+
         - SliceLiveData.CachedSliceLiveData？？？？？？
     - (2) 在Activity和Fragment中定义Observer，用来设置当数据发生变化之后的逻辑：
       ``` 
@@ -81,6 +86,7 @@
         ```
     - (4) 在主线程中通过`LiveData.setValue`设置数据值，在子线程通过`LiveData.postValue`
     - 上面的(2)和(3)通常在onCreate()中实现。
+
 * 当然也可以为没有关联LifecycleOwner的情况下观察数据
     - 通过`LiveData.observeForever()`的方式进行观察数据，但必须通过`LiveData.removeObserver()`来移除观察者。
 

@@ -1,5 +1,6 @@
 package com.wj.kotlin.mvvm
 
+import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -15,6 +16,18 @@ class FirstMvvmViewModel : ViewModel() {
     //最好给定初始值，那么就是通过MutableLiveData的构造函数传入即可
     val currentName: MutableLiveData<String> by lazy {
         MutableLiveData<String>("初始值")
+    }
+
+    val users: MediatorLiveData<String> by lazy {
+        MediatorLiveData<String>()
+    }
+
+
+    val userName1: MutableLiveData<String> by lazy {
+        MutableLiveData<String>("zhangsan")
+    }
+    val username2: MutableLiveData<String> by lazy {
+        MutableLiveData<String>("李四")
     }
 
     fun loadUserFromServer() {
