@@ -124,6 +124,7 @@
     - 在Activity的Fragment会共享Activity中的ViewModel实例
 * [ViewModel+Coroutine] 为每个ViewModel定义了ViewModelScope的作用域。可以在ViewModel清除的时候，自动取消协程。
   直接在ViewModel中使用 `viewModelScope.launch{}` 即可。
+    - 该协程创建的是主线程的协程，在viewModelScope中设置CoroutineContext的job为SupervisorJob()+Dispatchers.main
 
 =============== 详细解析 ================
 

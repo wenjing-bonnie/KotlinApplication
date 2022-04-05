@@ -54,9 +54,10 @@
     - 应用场景：设定临时变量的作用域。let/with的任何场景。
 * apply：持有this。返回的是对象本身，可链式调用。
     - 应用场景：对象实例化赋值。例如`View.inflater`的view绑定数据；多层级判空问题。
-* also：持有it。返回的是对象本身。可链式调用。
+* also：持有it。返回的是对象本身。可链式调用。y
     - 应用场景：同let。`while (reader.readLine().also { line = this } != null) `
       代替java的`while ( (line=reader.readLine())!=null )`
+      用
 * with():不是扩展函数，而是内联函数。对象需要传入，在函数体内持有this，可直接调用传入的对象的成员变量和成员方法。
     - 应用场景：多次调用同一对象的不同方法。可以省去对象名的调用，直接在`{}`内调用对象中的方法即可。
 * (T)：T类型。在函数体内持有it指向对象。
@@ -159,6 +160,18 @@
 
 * 声明处型变：在赋值操作的时候，无法自动完成类型的转换，会提示类型不匹配。可通过`in`和`out`来解决该问题。
 * 使用处型变：作为函数的形参，无法自动完成类型的转换。可通过in`和`out`或者星投影的方式来解决该问题。
+
+### 四 几个特殊符号
+
+* $
+* ?
+* ?:  如果为null，则执行后面的这个内容
+* !!  非空的值
+* ==/===
+* .. 一个范围
+* _  在进行结构的时候，可以只对一个值进行赋值
+* :: 得到类的Class对象/方法的引用
+* @ 限定类型，如this@MainActivity ； 跳出循环 {} lambda表达式
 
 =============== 详细解析 ================
 
@@ -1137,8 +1150,8 @@ import com.wj.kotlin.randomItemValuePrintln as r
 * 通过[协程作用域函数]来创建协程。协程作用域确定协程间的父子关系以及取消或者异常处理。
     - 创建不阻塞的当前线程的协程
         - `launch{}`：返回`Job`，用于协程监督与取消，用于无返回值的场景。如`GlobalScope.launch{}`创建一个[全局的协程]
-          ；`mainScope.launch{}`创建是[Android主线程作用域的协程]。
-        - `async{ return@async  xxxx }`：返回`Job`的子类`Deferred`，可通过`await()`获取完成时的返回值。
+          ；`mainScope.launch{}`[Android主线程作用域的协程]。
+        - `async{ return@async  xxxx }`：支持并发。返回`Job`的子类`Deferred`，可通过`await()`获取完成时的返回值。
     - 创建阻塞当前线程的协程
         - `runBlocking {}`创建一个[阻塞的协程]。等价于`Thread.sleep`
           。阻塞当前线程，直到里面的代码及所有的子协程执行完毕才会退出。所以如果该阻塞协程里面有`LAZY`启动模式的协程，如果该协程没有`start`或者`cancel`
@@ -1153,10 +1166,13 @@ import com.wj.kotlin.randomItemValuePrintln as r
     - `UNDISPATCHED`：该协程会立即被执行，不会等父协程执行完在执行，直到遇到第一个挂起函数，才会调度都指定调度器所在的线程上执行。相比较于其他模式，少了等待。
 * [协程调度器] 通过`launch(Dispatchers.IO) { }`传入调度器。这里设置的就是`CoroutineContext`的内容，该 `CoroutineContext`支持`+`
   来设置里面的四个元素。具体的值可见**4.协程上下文CoroutineContext**
-* [切换代码所运行的线程]
-    - (1)通过`withContext`切换代码所运行的线程，直到结束返回结果。 不会创建新的协程。
-    - (2)`launch{}`、`async{}`、`runBlocking {}`切换线程，但是要创建新的协程。
-    - 多个`withContext`是串行执行的，适合一个任务依赖于上一个任务返回的结果。`async{}和await()`同样可以实现相同的效果，但是需要创建新的协程。
+* [协程创建串行任务，即一个任务依赖于上一个任务返回的结果]
+    - (1) 通过`launch{}/async{}`来创建一个协程，通过`withContext`切换代码所运行的线程。在该协程里面的代码会串行执行。
+    - (2) 通过`launch{}/async{}`来创建一个协程，通过`coroutineScope {}/supervisorScope {}`
+      创建子协程来切换线程。父协程会依次执行子协程，执行完子协程之后，在执行子协程后面的父协程中的内容。
+    - 两者的区别在于是否有协程产生。
+
+[疑问：为什么要有子协程概念？？？？？]
 
 ### 7.协程取消
 
@@ -1206,6 +1222,7 @@ import com.wj.kotlin.randomItemValuePrintln as r
     - 每一次有主线程到IO线程，都是一次协程挂起suspend；每一次的IO线程到主线程，都是一次协程的恢复resume。
     - 挂起只是将执行流程转移到了其他线程，主线程并未被阻塞。
 * 挂起函数及里面的调用的函数都必须是挂起函数。
+* 当方法将协程挂起的时候，协程后面的代码不会执行，直到suspend方法执行完毕。
 
 
     
